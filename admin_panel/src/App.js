@@ -1,7 +1,15 @@
 import React, {useState} from 'react';
 import './style/app.css'
-import TelegramIcon from '@mui/icons-material/Telegram';
 import Login from "./components/login";
+import TelegramIcon from '@mui/icons-material/Telegram';
+import {RouterProvider} from "react-router-dom";
+import {
+    createBrowserRouter,
+} from "react-router-dom";
+import Menu from "./components/menu";
+import Tables from "./components/tables";
+import Statistics from "./components/statistics";
+import Users from "./components/users";
 
 
 const App = () => {
@@ -11,12 +19,35 @@ const App = () => {
         setTitle(_title)
     }
 
+
+    const router = createBrowserRouter([
+        {
+            path: "/",
+            element: <Login setTitle={setTitleComponent}/>,
+        },
+        {
+            path: 'menu',
+            element: <Menu setTitle={setTitleComponent}/>
+        },
+        {
+            path: 'tables',
+            element: <Tables setTitle={setTitleComponent}/>
+        },
+        {
+            path: 'users',
+            element: <Users setTitle={setTitleComponent}/>
+        },
+        {
+            path: 'statistics',
+            element: <Statistics setTitle={setTitleComponent}/>
+        }
+    ]);
     return (
         <div className='Root'>
             <h1 className='TitleApp'> Панель администрирования telegram-bot</h1>
             <div className='BaseComponent'>
                 <h1 className='TitleComponent'>{title}</h1>
-                <Login setTitle={setTitleComponent}/>
+                <RouterProvider router={router}/>
                 <TelegramIcon sx={{ color: "#2860AD", fontSize: 95, marginLeft:"auto"}}/>
             </div>
         </div>
