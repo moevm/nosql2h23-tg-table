@@ -7,6 +7,10 @@ const Tables = (props) => {
         window.location.href='/menu';
     }
 
+    const TablePage = (id) => {
+        window.location.href=`/table/${id}`;
+    }
+
     const [tablesList, setTablesList] = useState([
         {id: 1, name: '[Урмф] 0382, 0383'},
         {id: 2, name: '[PR] 1243, 9999, 1010'},
@@ -18,8 +22,8 @@ const Tables = (props) => {
         <div>
             <div>
                 {tablesList.map(table =>
-                    <div className='tablesListItem' key = {table.id} onClick={()=>{
-                        console.log(456)}}>
+                    <div className='tablesListItem' key = {table.id} onClick={()=>
+                        TablePage(table.id)}>
                         {table.name}
                         <CloseIcon sx={{float: "right", color: "#EE0100"}} onClick={(e)=>{
                             e.stopPropagation()
