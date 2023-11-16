@@ -1,0 +1,51 @@
+.Root {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.TitleApp {
+    color: aliceblue;
+    background-color: rgba(40, 96, 173, 1);
+    margin-top: 45px;
+    border: 2px;
+    border-radius: 10px;
+    font-family: "Comfortaa";
+    font-weight: lighter;
+    padding: 7px;
+}
+
+.BaseComponent{
+    background-color: rgba(170, 201, 254, 1);
+    margin-top: 35px;
+    border: 10px solid rgba(170, 201, 254, 1);
+    border-radius: 50px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.TitleComponent{
+    background-color: white;
+    border: 2px;
+    border-radius: 5px;
+    font-family: "Comfortaa";
+    font-weight: lighter;
+    padding: 4px;
+    width: fit-content;
+}
+
+.defaultButton{
+    font-family: "Comfortaa", cursive;
+    background-color: rgba(40, 96, 173, 1);
+    color: white;
+    width: fit-content;
+    border: 0;
+    border-radius: 5px;
+    font-size: 22px;
+    /*-webkit-transition: all 0.3 ease;*/
+    /*transition: all 0.3 ease;*/
+    cursor: pointer;
+    padding: 4px;
+}
