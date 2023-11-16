@@ -1,0 +1,13 @@
+
+.tablesListItem{
+    font-family: "Comfortaa", cursive;
+    background-color: white;
+    border: 0;
+    border-radius: 3px;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 6px 5px 6px 20px;
+    min-width: 370px;
+    margin: 20px 40px 30px 40px ;
+    text-align: left;
+}
