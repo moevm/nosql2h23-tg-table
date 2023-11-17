@@ -1,12 +1,14 @@
 import React, {useEffect, useState} from 'react';
 import "../style/users.css"
 import CreateIcon from '@mui/icons-material/Create';
+import AddUserDialog from "./dialogs/add_user_dialog";
+import EditUserDialog from "./dialogs/edit_user_dialog";
 
 const Users = (props) => {
     useEffect(()=>{
         props.setTitle("Пользователи")
     })
-    const users = [
+    let users = [
         {
             id: 1,
             groupNumber: "0382",
@@ -42,6 +44,9 @@ const Users = (props) => {
     }
 
     const [currentUsers, setCurrentUsers] = useState(users)
+    const [isAddUserDialogVisible, setIsAddUserDialogVisible] = useState(false)
+    const [isEditUserDialogVisible, setIsEditUserDialogVisible] = useState(false)
+    const [currentEditUser, setCurrentEditUser] = useState(users[0])
     const filterUsers = (param)=>{
         if (param===""){
             setCurrentUsers(users)
@@ -50,8 +55,40 @@ const Users = (props) => {
             setCurrentUsers(newUsers)
         }
     }
+    const addUser = (user)=>{
+        user.id = users.length+1
+        user.requestCount = 0
+        const newUsers = [...users]
+        newUsers.push(user)
+        setCurrentUsers(newUsers)
+        users = newUsers
+    }
+    const editUser = (oldUser,newUser)=>{
+        console.log(oldUser,newUser)
+        let newUsers = [...users]
+        newUsers = newUsers.map(item=> item.id===oldUser.id ? newUser : item)
+        setCurrentUsers(newUsers)
+        users = newUsers
+    }
+    const deleteUser = (user)=>{
+        let newUsers = [...users].filter(e=>e.id!==user.id)
+        console.log(newUsers)
+        setCurrentUsers(newUsers)
+        users = newUsers
+    }
+    const launchEditUserDialog = (user)=>{
+        setCurrentEditUser(user)
+        setIsEditUserDialogVisible(true)
+    }
     return (
         <div >
+            <EditUserDialog
+                visible={isEditUserDialogVisible}
+                setVisible={setIsEditUserDialogVisible}
+                editUserFun={editUser}
+                deleteUserFun={deleteUser}
+                user={currentEditUser}
+            />
             <div style={{display: "flex", flexDirection: "column", minWidth: 400}}>
                 <button
                     className='defaultButton'
@@ -80,7 +117,7 @@ const Users = (props) => {
                 </select>
             </div>
             <div style={{overflow: "auto",maxHeight:300}}>
-                <table style={{minWidth:700}}>
+                <table className="MyTable" style={{minWidth:700}}>
                     <thead>
                     <tr>
                         <th>
@@ -116,7 +153,7 @@ const Users = (props) => {
                                 {user.requestCount}
                             </td>
                             <td>
-                                <CreateIcon style={{color: "#1A4297"}}/>
+                                <CreateIcon style={{color: "#1A4297",cursor:"pointer"}} onClick={()=>{launchEditUserDialog(user)}}/>
                             </td>
                         </tr>
                     )}
@@ -124,9 +161,11 @@ const Users = (props) => {
                 </table>
             </div>
             <div style={{display: "flex", flexDirection: "column"}}>
+                <AddUserDialog visible={isAddUserDialogVisible} setVisible={setIsAddUserDialogVisible} addUserFun={addUser}/>
                 <button
                     className='defaultButton'
                     style={{marginLeft: 60, fontSize: 18, marginTop: 25, paddingLeft: 10, paddingRight: 10}}
+                    onClick={()=>setIsAddUserDialogVisible(true)}
                 >
                     + Добавить пользователя
                 </button>

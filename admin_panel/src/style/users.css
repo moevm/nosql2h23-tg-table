@@ -10,14 +10,14 @@
     text-align: left;
 }
 
-table{
+.MyTable{
     background: white;
     border: 2px solid #1A4297;
     margin-left: 20px;
     margin-right: 20px;
 }
 
-thead th{
+.MyTable thead th{
     color: #1A4297;
     border-bottom: 2px solid #1A4297;
     border-right: 1px solid #1A4297;
@@ -25,11 +25,11 @@ thead th{
     border-top: 2px solid #1A4297;
 }
 
-table, th, td{
+.MyTable, th, td{
     border-collapse: collapse;
 }
 
-tbody td{
+.MyTable tbody td{
     border-right: 1px dotted black;
     border-left: 1px dotted black;
     border-bottom: 1px dotted black;

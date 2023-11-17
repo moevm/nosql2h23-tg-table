@@ -37,7 +37,7 @@ const Tables = (props) => {
     const [link, setLink] = useState("")
     const addTable = ()=>{
         if (subject.length===0 || link.length===0 || groupList.length===0){
-            alert("Все поля должны быть не пусты")
+            alert("Пожалуйста, заполните все поля!")
             return
         }
         const table = {
