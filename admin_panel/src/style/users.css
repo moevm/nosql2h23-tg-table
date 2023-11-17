@@ -1,0 +1,36 @@
+.params{
+    font-family: "Comfortaa", cursive;
+    background-color: white;
+    border: 0;
+    border-radius: 3px;
+    font-size: 20px;
+    padding: 3px 10px 3px 20px;
+    width: fit-content;
+    margin: 20px 40px 20px 60px ;
+    text-align: left;
+}
+
+table{
+    background: white;
+    border: 2px solid #1A4297;
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+thead th{
+    color: #1A4297;
+    border-bottom: 2px solid #1A4297;
+    border-right: 1px solid #1A4297;
+    border-left: 1px solid #1A4297;
+    border-top: 2px solid #1A4297;
+}
+
+table, th, td{
+    border-collapse: collapse;
+}
+
+tbody td{
+    border-right: 1px dotted black;
+    border-left: 1px dotted black;
+    border-bottom: 1px dotted black;
+}

@@ -36,6 +36,10 @@ const Tables = (props) => {
     const [subject, setSubject] = useState("")
     const [link, setLink] = useState("")
     const addTable = ()=>{
+        if (subject.length===0 || link.length===0 || groupList.length===0){
+            alert("Все поля должны быть не пусты")
+            return
+        }
         const table = {
             id: tablesList[tablesList.length-1].id+1,
             name: `[${subject}] ${groupList.map(e=>{return e.groupNumber}).join(", ")}`,
@@ -46,6 +50,7 @@ const Tables = (props) => {
         setTablesList(newTablesList)
         setSubject('')
         setLink('')
+        setGroupsList([])
         setIsAddDialogVisible(false)
     }
     useEffect(()=>{
@@ -128,7 +133,12 @@ const Tables = (props) => {
                         <button
                             className='defaultButton'
                             style={{marginLeft:"auto"}}
-                            onClick={()=>{setIsAddDialogVisible(false)}}
+                            onClick={()=>{
+                                setIsAddDialogVisible(false)
+                                setSubject('')
+                                setLink('')
+                                setGroupsList([])
+                            }}
                         >
                             Отмена
                         </button>
