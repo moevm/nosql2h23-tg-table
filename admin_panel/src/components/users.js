@@ -44,9 +44,9 @@ const Users = (props) => {
     }
 
     const [currentUsers, setCurrentUsers] = useState(users)
-    const [isAddUserDialogVisible, setIsAddUserDialogVisible] = useState(false)
     const [isEditUserDialogVisible, setIsEditUserDialogVisible] = useState(false)
     const [currentEditUser, setCurrentEditUser] = useState(users[0])
+    const [isAddUserDialogVisible,setIsAddUserDialogVisible] = useState(false)
     const filterUsers = (param)=>{
         if (param===""){
             setCurrentUsers(users)
@@ -64,7 +64,6 @@ const Users = (props) => {
         users = newUsers
     }
     const editUser = (oldUser,newUser)=>{
-        console.log(oldUser,newUser)
         let newUsers = [...users]
         newUsers = newUsers.map(item=> item.id===oldUser.id ? newUser : item)
         setCurrentUsers(newUsers)
@@ -72,7 +71,6 @@ const Users = (props) => {
     }
     const deleteUser = (user)=>{
         let newUsers = [...users].filter(e=>e.id!==user.id)
-        console.log(newUsers)
         setCurrentUsers(newUsers)
         users = newUsers
     }
@@ -109,7 +107,7 @@ const Users = (props) => {
                     <option value={""}>
                         Все
                     </option>
-                    {(Array.from(new Set(users.map(e=>e.groupNumber))).map(number=>
+                    {(Array.from(new Set(currentUsers.map(e=>e.groupNumber))).map(number=>
                         <option key={number} value={number}>
                             {number}
                         </option>
