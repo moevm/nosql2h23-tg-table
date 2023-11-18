@@ -39,7 +39,7 @@ export function Graph(props){
         responsive: true,
         plugins: {
             legend: {
-                position: 'bottom',
+                position: 'bottom   ',
             },
         },
     };

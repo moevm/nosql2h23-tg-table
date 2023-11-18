@@ -3,12 +3,16 @@ import "../style/users.css"
 import CreateIcon from '@mui/icons-material/Create';
 import AddUserDialog from "./dialogs/add_user_dialog";
 import EditUserDialog from "./dialogs/edit_user_dialog";
+import ExportDialog from "./dialogs/export_dialog";
+import ImportDialog from "./dialogs/import_dialog";
 
 const Users = (props) => {
     useEffect(()=>{
         props.setTitle("Пользователи")
     })
-    let users = [
+
+    const properties=['id','groupNumber','name','telegramId','requestCount']
+    let _users = [
         {
             id: 1,
             groupNumber: "0382",
@@ -43,10 +47,19 @@ const Users = (props) => {
         window.location.href='/menu';
     }
 
+    const [users,setUsers] = useState(_users)
     const [currentUsers, setCurrentUsers] = useState(users)
     const [isEditUserDialogVisible, setIsEditUserDialogVisible] = useState(false)
     const [currentEditUser, setCurrentEditUser] = useState(users[0])
     const [isAddUserDialogVisible,setIsAddUserDialogVisible] = useState(false)
+    const [isExportDialogVisible, setIsExportDialogVisible] = useState(false)
+    const [isImportDialogVisible, setIsImportDialogVisible] = useState(false)
+
+    const resetFilter = ()=>{
+        const select = document.getElementById("select_user")
+        select.value = ""
+    }
+
     const filterUsers = (param)=>{
         if (param===""){
             setCurrentUsers(users)
@@ -61,18 +74,18 @@ const Users = (props) => {
         const newUsers = [...users]
         newUsers.push(user)
         setCurrentUsers(newUsers)
-        users = newUsers
+        setUsers(newUsers)
     }
     const editUser = (oldUser,newUser)=>{
         let newUsers = [...users]
         newUsers = newUsers.map(item=> item.id===oldUser.id ? newUser : item)
         setCurrentUsers(newUsers)
-        users = newUsers
+        setUsers(newUsers)
     }
     const deleteUser = (user)=>{
         let newUsers = [...users].filter(e=>e.id!==user.id)
         setCurrentUsers(newUsers)
-        users = newUsers
+        setUsers(newUsers)
     }
     const launchEditUserDialog = (user)=>{
         setCurrentEditUser(user)
@@ -87,23 +100,38 @@ const Users = (props) => {
                 deleteUserFun={deleteUser}
                 user={currentEditUser}
             />
+            <ExportDialog
+                visible={isExportDialogVisible}
+                setVisible={setIsExportDialogVisible}
+                data={currentUsers}
+            />
+            <ImportDialog
+                visible={isImportDialogVisible}
+                setVisible={setIsImportDialogVisible}
+                setCurrent={setCurrentUsers}
+                setAll={setUsers}
+                properties={properties}
+                filter={resetFilter}
+            />
             <div style={{display: "flex", flexDirection: "column", minWidth: 400}}>
                 <button
                     className='defaultButton'
                     style={{background: '#62A3E7', marginLeft:"auto", fontSize: 18, minWidth: 100}}
+                    onClick={()=>{setIsImportDialogVisible(true)}}
                 >
                     Импорт
                 </button>
                 <button
                     className='defaultButton'
                     style={{background: '#62A3E7', marginTop: 15, marginLeft:"auto", fontSize: 18, minWidth: 100}}
+                    onClick={()=>{setIsExportDialogVisible(true)}}
                 >
                     Экспорт
                 </button>
             </div>
             <div className="params">
                 <span>Параметр:</span>
-                <select style={{marginLeft: 10, fontSize: 18}} onChange={(event)=>{filterUsers(event.target.value)}}>
+                <select id="select_user" style={{marginLeft: 10, fontSize: 18}} onChange={(event)=>{filterUsers(event.target.value)}}>
                     <option value={""}>
                         Все
                     </option>
