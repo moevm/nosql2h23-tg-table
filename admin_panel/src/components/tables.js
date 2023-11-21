@@ -3,6 +3,7 @@ import "../style/tables.css"
 import CloseIcon from '@mui/icons-material/Close';
 import BaseDialog from "./base_dialog";
 import GroupList from "./group_list/group_list";
+import TableSettingsDialog from "./dialogs/table_settings_dialog";
 
 const Tables = (props) => {
     const MenuPage = () => {
@@ -35,21 +36,28 @@ const Tables = (props) => {
     ])
     const [subject, setSubject] = useState("")
     const [link, setLink] = useState("")
+    const [sheetQuantity, setSheetQuantity] = useState(1)
+    const [isSettingsDialogVisible, setIsSettingsDialogVisible] = useState(false)
+    const [addTableSettings,setAddTableSettings] = useState([])
     const addTable = ()=>{
-        if (subject.length===0 || link.length===0 || groupList.length===0){
+        if (subject.length===0 || link.length===0 || groupList.length===0 || sheetQuantity===0 || addTableSettings===null){
             alert("Пожалуйста, заполните все поля!")
             return
         }
+        console.log(addTableSettings)
         const table = {
             id: tablesList[tablesList.length-1].id+1,
             name: `[${subject}] ${groupList.map(e=>{return e.groupNumber}).join(", ")}`,
-            link: link
+            link: link,
+            settings : addTableSettings
         }
         const newTablesList = [...tablesList]
         newTablesList.push(table)
         setTablesList(newTablesList)
         setSubject('')
         setLink('')
+        setSheetQuantity(1)
+        setAddTableSettings([])
         setGroupsList([])
         setIsAddDialogVisible(false)
     }
@@ -81,14 +89,20 @@ const Tables = (props) => {
                 </div>
             </BaseDialog>
             <BaseDialog visible={isAddDialogVisible} setVisible={setIsAddDialogVisible}>
+                <TableSettingsDialog
+                    visible={isSettingsDialogVisible}
+                    setVisible={setIsSettingsDialogVisible}
+                    setTableSettings={setAddTableSettings}
+                    sheetQuantity={sheetQuantity}
+                />
                 <div style={{display:"flex", flexDirection:"column",fontSize: 24}}>
                     <table style={{borderSpacing: 25}}>
                         <tbody>
                         <tr>
-                            <td>
+                            <td style={{textAlign:"end"}}>
                                 <span>Код предмета: </span>
                             </td>
-                            <td style={{textAlign:"end"}}>
+                            <td style={{textAlign:"end"}} colSpan="2">
                                 <input
                                     type='text'
                                     required
@@ -102,7 +116,7 @@ const Tables = (props) => {
                             <td style={{textAlign:"end"}}>
                                 <span>Группы: </span>
                             </td>
-                            <td>
+                            <td colSpan="2">
                                 <GroupList groups={groupList} updateGroupList={setGroupsList}/>
                             </td>
                         </tr>
@@ -110,7 +124,7 @@ const Tables = (props) => {
                             <td style={{textAlign:"end"}}>
                                 <span>Ссылка: </span>
                             </td>
-                            <td>
+                            <td colSpan="2">
                                 <input
                                     type='text'
                                     required
@@ -118,6 +132,46 @@ const Tables = (props) => {
                                     value={link}
                                     onChange={(e)=>{setLink(e.target.value)}}
                                 />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style={{textAlign:"end"}}>
+                                <span>Количество листов в таблице: </span>
+                            </td>
+                            <td colSpan="2">
+                                <input
+                                    type='number'
+                                    required
+                                    className="myInput"
+                                    value={sheetQuantity}
+                                    onChange={(e)=>{
+                                        setAddTableSettings([])
+                                        setSheetQuantity(Number(e.target.value))
+                                    }}
+                                />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style={{textAlign:"end"}}>
+                                <span>Настройки таблицы:</span>
+                            </td>
+                            <td style={{textAlign:"start"}}>
+                                {addTableSettings.length===0 ?
+                                    <span style={{color:"red"}}>не установлены</span> :
+                                    <span style={{color:"green"}}>установлены</span>
+                                }
+                            </td>
+                            <td>
+                                {addTableSettings.length===0 ?
+                                    <button
+                                        className="defaultButton"
+                                        onClick={()=>{setIsSettingsDialogVisible(true)}}
+                                    >Установить</button> :
+                                    <button
+                                        className="defaultButton"
+                                        onClick={()=>{setIsSettingsDialogVisible(true)}}
+                                    >Редактировать</button>
+                                }
                             </td>
                         </tr>
                         </tbody>
