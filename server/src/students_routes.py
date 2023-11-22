@@ -13,12 +13,16 @@ def get_users(request: Request):
     return users
 
 
-@router.post("/", response_description="Create a new student", status_code=status.HTTP_201_CREATED, response_model=Student)
+@router.post(
+    "/",
+    response_description="Create a new student",
+    status_code=status.HTTP_201_CREATED,
+    response_model=Student
+)
 def create_student(request: Request, student: Student = Body(...)):
     student = jsonable_encoder(student)
     new_user = request.app.database["Students"].insert_one(student)
     created_user = request.app.database["Students"].find_one(
         {"_id": new_user.inserted_id}
     )
-
     return created_user

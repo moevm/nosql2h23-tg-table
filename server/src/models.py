@@ -19,3 +19,13 @@ class Student(BaseModel):
         json_encoders = {ObjectId: str}
         arbitrary_types_allowed = True
 
+
+class AuthData(BaseModel):
+    id: Optional[PyObjectId] = Field(alias="_id", default=None)
+    login: str = Field()
+    password: str = Field()
+
+    class Config:
+        populate_by_name = True
+        json_encoders = {ObjectId: str}
+        arbitrary_types_allowed = True
