@@ -11,15 +11,15 @@ const Login = (props) => {
     const {mutate,isLoading} = useMutation(
         'login',
         ()=>{
-            fetch("http://localhost:3000",{
+            fetch("http://localhost:8000/users/",{
                 method: 'GET'
             })
                 .then(res=>res.json())
                 .then(data=>{
-                    setUser(data.user)
+                    console.log(data)
+                    // setUser(data.user)
                 })
-            console.log("asdad")
-            window.location.href='/menu';
+            // window.location.href='/menu';
         }
     )
     useEffect(()=>{
