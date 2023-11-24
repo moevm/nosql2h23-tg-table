@@ -4,7 +4,6 @@ import BaseDialog from "../base_dialog";
 class EditUserDialog extends React.Component{
     constructor(props) {
         super(props);
-
         this.state = {
             name : props.user.name,
             groupNumber : props.user.groupNumber,
@@ -29,7 +28,7 @@ class EditUserDialog extends React.Component{
 
     editUser = ()=>{
         const user = {
-            id: this.state.oldUser.id,
+            _id: this.state.oldUser._id,
             name : this.state.name,
             groupNumber : this.state.groupNumber,
             telegramId : this.state.telegramId,

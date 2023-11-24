@@ -11,46 +11,30 @@ const Users = (props) => {
         props.setTitle("Пользователи")
     })
 
-    const properties=['id','groupNumber','name','telegramId','requestCount']
-    let _users = [
-        {
-            id: 1,
-            groupNumber: "0382",
-            name: "Чегодаев Кондратий Сергеев",
-            telegramId: "dizadan",
-            requestCount: 54
-        },
-        {
-            id: 2,
-            groupNumber: "4333",
-            name: "Сергеев Дмитрий Андреевич",
-            telegramId: "dise0126",
-            requestCount: 1
-        },
-        {
-            id: 3,
-            groupNumber: "0382",
-            name: "Чегодаева Елизавета Александровна <3",
-            telegramId: "elizache",
-            requestCount: 100000
-        },
-        {
-            id: 4,
-            groupNumber: "7777",
-            name: "Кондратов Юрий Александрович",
-            telegramId: "kordan04",
-            requestCount: 33
-        },
-    ]
+    useEffect(()=>{
+        fetch("http://localhost:8000/students/",{
+            method: 'GET',
+            headers: {
+                "Content-Type": "application/json",
+            },
+        })
+            .then(res=>res.json())
+            .then(data=>{
+                setUsers(data)
+                setCurrentUsers(data)
+            })
+    },[])
+
+    const properties=['_id','groupNumber','name','telegramId','requestCount']
 
     const MenuPage = () => {
         window.location.href='/menu';
     }
 
-    const [users,setUsers] = useState(_users)
-    const [currentUsers, setCurrentUsers] = useState(users)
+    const [users,setUsers] = useState([])
+    const [currentUsers, setCurrentUsers] = useState([])
     const [isEditUserDialogVisible, setIsEditUserDialogVisible] = useState(false)
-    const [currentEditUser, setCurrentEditUser] = useState(users[0])
+    const [currentEditUser, setCurrentEditUser] = useState({_id:"",name:"",telegramId:"",groupNumber:""})
     const [isAddUserDialogVisible,setIsAddUserDialogVisible] = useState(false)
     const [isExportDialogVisible, setIsExportDialogVisible] = useState(false)
     const [isImportDialogVisible, setIsImportDialogVisible] = useState(false)
@@ -69,23 +53,64 @@ const Users = (props) => {
         }
     }
     const addUser = (user)=>{
-        user.id = users.length+1
-        user.requestCount = 0
-        const newUsers = [...users]
-        newUsers.push(user)
-        setCurrentUsers(newUsers)
-        setUsers(newUsers)
+        const body = {
+            groupNumber: user.groupNumber,
+            name: user.name,
+            telegramId: user.telegramId,
+        }
+        fetch("http://localhost:8000/students/add_student",{
+            method: 'POST',
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(body)
+        })
+            .then(res=>res.json())
+            .then(data=>{
+                console.log(data)
+                if (data.status===201){
+                    user._id = data._id
+                    user.requestCount = 0
+                    const newUsers = [...users]
+                    newUsers.push(user)
+                    setCurrentUsers(newUsers)
+                    setUsers(newUsers)
+                } else {
+
+                }
+            })
     }
     const editUser = (oldUser,newUser)=>{
-        let newUsers = [...users]
-        newUsers = newUsers.map(item=> item.id===oldUser.id ? newUser : item)
-        setCurrentUsers(newUsers)
-        setUsers(newUsers)
+        const updatedUser = {
+            _id: oldUser._id,
+            groupNumber: newUser.groupNumber,
+            telegramId: newUser.telegramId,
+            name: newUser.name,
+            requestCount: oldUser.requestCount
+        }
+        fetch("http://localhost:8000/students/update_student",{
+            method: 'PUT',
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(updatedUser)
+        })
+            .then(res=>res.json())
+            .then((data)=>{
+                if (data.status===200){
+                    let newUsers = [...users]
+                    newUsers = newUsers.map(item=> item._id===oldUser._id ? updatedUser : item)
+                    setCurrentUsers(newUsers)
+                    setUsers(newUsers)
+                } else {
+                    alert("Не удалось отредактировать данные")
+                }
+            })
     }
     const deleteUser = (user)=>{
-        let newUsers = [...users].filter(e=>e.id!==user.id)
-        setCurrentUsers(newUsers)
-        setUsers(newUsers)
+        // let newUsers = [...users].filter(e=>e.id!==user.id)
+        // setCurrentUsers(newUsers)
+        // setUsers(newUsers)
     }
     const launchEditUserDialog = (user)=>{
         setCurrentEditUser(user)
@@ -135,7 +160,7 @@ const Users = (props) => {
                     <option value={""}>
                         Все
                     </option>
-                    {(Array.from(new Set(currentUsers.map(e=>e.groupNumber))).map(number=>
+                    {(Array.from(new Set(users.map(e=>e.groupNumber))).map(number=>
                         <option key={number} value={number}>
                             {number}
                         </option>
@@ -165,7 +190,7 @@ const Users = (props) => {
                     </thead>
                     <tbody>
                     {currentUsers.map(user=>
-                        <tr key={user.id}>
+                        <tr key={user._id}>
                             <td>
                                 {user.groupNumber}
                             </td>

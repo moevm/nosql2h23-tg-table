@@ -11,8 +11,6 @@ def auth(request: Request):
         "password": password
     })
     if user is not None:
-        print("Success")
         return {"status": 200}
     else:
-        print("Fail")
         return {"status": 400}
