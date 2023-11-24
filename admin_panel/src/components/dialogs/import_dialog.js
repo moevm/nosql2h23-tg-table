@@ -36,14 +36,30 @@ const ImportDialog = (props) => {
                         if (props.properties.includes("time")){
                             for (const i of res.data.keys()){
                                 res.data[i].time = new Date(res.data[i].time)
+                                delete res.data[i].requestCount
                             }
                         }
-                        props.setAll(res.data)
-                        props.setCurrent(res.data)
-                        props.filter()
-                        props.setVisible(false)
-                        setFile(null)
-                        setFilename('')
+                        fetch("http://localhost:8000/students/",{
+                            method: 'POST',
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify(res.data)
+                        })
+                            .then(res=>res.json())
+                            .then(data=>{
+                                console.log(data)
+                                if (data.status===200){
+                                    props.setAll(res.data)
+                                    props.setCurrent(res.data)
+                                    props.filter()
+                                    props.setVisible(false)
+                                    setFile(null)
+                                    setFilename('')
+                                } else {
+                                    alert("Ошибка")
+                                }
+                            })
                     } else {
                         alert("Ошибка в формате файла")
                     }

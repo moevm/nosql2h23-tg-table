@@ -67,7 +67,6 @@ const Users = (props) => {
         })
             .then(res=>res.json())
             .then(data=>{
-                console.log(data)
                 if (data.status===201){
                     user._id = data._id
                     user.requestCount = 0
@@ -108,9 +107,23 @@ const Users = (props) => {
             })
     }
     const deleteUser = (user)=>{
-        // let newUsers = [...users].filter(e=>e.id!==user.id)
-        // setCurrentUsers(newUsers)
-        // setUsers(newUsers)
+        fetch("http://localhost:8000/students/delete_student",{
+            method: 'DELETE',
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(user)
+        })
+            .then(res=>res.json())
+            .then((data)=>{
+                if (data.status===200){
+                    let newUsers = [...users].filter(e=>e._id!==user._id)
+                    setCurrentUsers(newUsers)
+                    setUsers(newUsers)
+                } else {
+                    alert("Удаление не удалось")
+                }
+            })
     }
     const launchEditUserDialog = (user)=>{
         setCurrentEditUser(user)
@@ -128,7 +141,7 @@ const Users = (props) => {
             <ExportDialog
                 visible={isExportDialogVisible}
                 setVisible={setIsExportDialogVisible}
-                data={currentUsers}
+                data={users}
             />
             <ImportDialog
                 visible={isImportDialogVisible}

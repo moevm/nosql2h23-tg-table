@@ -21,7 +21,7 @@ def get_students(request: Request):
 
 @router.post(
     "/add_student",
-    response_description="Create a new student",
+    response_description="Operation status + inserted _id",
 )
 def create_student(request: Request, student: Student):
     student = jsonable_encoder(student)
@@ -38,7 +38,7 @@ def create_student(request: Request, student: Student):
 
 @router.put(
     "/update_student",
-    response_description="Update student"
+    response_description="Operation Status"
 )
 def update_student(request: Request, student: Student):
     student = jsonable_encoder(student)
@@ -53,3 +53,35 @@ def update_student(request: Request, student: Student):
         return {"status": 400}
     else:
         return {"status": 200}
+
+
+@router.delete(
+    "/delete_student",
+    response_description="Operations status"
+)
+def update_student(request: Request, student: Student):
+    student = jsonable_encoder(student)
+    delete_result = request.app.database["Students"].delete_one(
+        {"_id": ObjectId(student["_id"])}
+    )
+    if delete_result.deleted_count == 0:
+        return {"status": 400}
+    else:
+        return {"status": 200}
+
+@router.post(
+    "/",
+    response_description="Operation status"
+)
+def import_student(request: Request, students: List[Student]):
+    students = jsonable_encoder(students)
+    delete_result = request.app.database["Students"].delete_many({})
+    for student in students:
+        student["_id"] = ObjectId(student["_id"])
+    insert_result = request.app.database["Students"].insert_many(students)
+    print(insert_result.inserted_ids)
+
+    if len(insert_result.inserted_ids) == len(students):
+        return {"status": 200}
+    else:
+        return {"status": 400}
