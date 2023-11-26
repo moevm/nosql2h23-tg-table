@@ -28,7 +28,21 @@ const ConcreteTable = (props) => {
     }
 
     const saveTable = () => {
-        console.log("tut save kek")
+        fetch(`http://localhost:8000/spreadsheets/${id}`,{
+            method: 'PUT',
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(spreadsheet)
+        })
+            .then(res=>res.json())
+            .then((data)=>{
+                if (data.status===200){
+
+                } else {
+                    alert("Не удалось отредактировать данные")
+                }
+            })
     }
 
     const [spreadsheet,setSpreadSheet] = useState(null)

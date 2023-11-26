@@ -4,75 +4,55 @@ import SearchIcon from '@mui/icons-material/Search';
 import PlotDialog from "./dialogs/plot_dialog";
 import ExportDialog from "./dialogs/export_dialog";
 import ImportDialog from "./dialogs/import_dialog";
+import _ from "lodash";
 
 const Statistics = (props) => {
     useEffect(()=>{
         props.setTitle("Статистика")
     })
 
+    useEffect(()=>{
+        fetch(`http://localhost:8000/requests`,{
+            method: 'GET',
+            headers: {
+                "Content-Type": "application/json",
+            },
+        })
+            .then(res=>res.json())
+            .then(data=>{
+                const requestsWithCorrectTime = data.map(e=>{
+                    return {...e,timestamp:new Date(e.timestamp)}
+                })
+                setRequests(requestsWithCorrectTime)
+                setCurrentRequests(requestsWithCorrectTime)
+            })
+    },[])
+
     const MenuPage = () => {
         window.location.href='/menu';
     }
 
-    const properties = ["id","time","groupNumber","name","table"]
-
-    let __requests = [
-        {
-            id: 1,
-            time: new Date('December 18, 2021 03:24:00'),
-            groupNumber: "4333",
-            name: "Чегодаев Кондратий Сергеев",
-            table: "[noSQL]"
-        },
-        {
-            id: 2,
-            time: new Date('December 17, 2021 03:24:00'),
-            groupNumber: "6654",
-            name: "Сергеев Чегодай Кондратьевич",
-            table: "[lol]"
-        },
-        {
-            id: 3,
-            time: new Date('December 17, 2021 03:24:00'),
-            groupNumber: "5555",
-            name: "Сергеев Кондратий Чегодаевич",
-            table: "[noSQL]"
-        },
-        {
-            id: 4,
-            time: new Date('December 5, 2021 03:25:00'),
-            groupNumber: "3333",
-            name: "Чегодаев Кондратий Сергеев",
-            table: "[kek]"
-        },
-        {
-            id: 5,
-            time: new Date('December 9, 2023 03:25:00'),
-            groupNumber: "5555",
-            name: "Etlon",
-            table: "[applyLatte]"
-        },
-    ]
+    const properties = ["_id","timestamp","groupNumber","student","spreadsheet"]
 
     const filterParams = [{
         name: "Все",
         value: ""
     }, {
         name: "Время",
-        value: "time"
+        value: "timestamp"
     }, {
         name: "Группа",
         value: "groupNumber"
     }, {
         name: "ФИО",
-        value: "name"
+        value: "student.studentName"
     }, {
         name: "Таблица",
-        value: "table"
+        value: "spreadsheet.spreadsheetName"
     }]
 
-    const [requests,setRequests] = useState(__requests)
-    const [currentRequests, setCurrentRequests] = useState(requests)
+    const [requests,setRequests] = useState([])
+    const [currentRequests, setCurrentRequests] = useState([])
     const [currentFilter, setCurrentFilter] = useState("")
     const [searchValue, setSearchValue] = useState("")
     const [isPlotVisible, setIsPlotVisible] = useState(false)
@@ -89,11 +69,13 @@ const Statistics = (props) => {
     const filterRequests = ()=>{
         let newRequests;
         if (searchValue.length>0){
-            newRequests = [...requests].filter(e=>e[currentFilter].toString()   .includes(searchValue))
+            newRequests = [...requests].filter(e=>{
+                // e[currentFilter].toString().
+                return  _.get(e,`${currentFilter}`).toString().includes(searchValue)
+            })
         } else {
             newRequests = requests
         }
-
         setCurrentRequests(newRequests)
     }
 
@@ -116,6 +98,7 @@ const Statistics = (props) => {
                 setAll={setRequests}
                 properties={properties}
                 filter={resetFilter}
+                path="requests"
             />
             <div style={{display: "flex", flexDirection: "column", minWidth: 400}}>
                 <button
@@ -180,18 +163,18 @@ const Statistics = (props) => {
                     </thead>
                     <tbody>
                     {currentRequests.map(request=>
-                        <tr key={request.id}>
+                        <tr key={request._id}>
                             <td>
-                                {`${request.time.toLocaleDateString()} ${request.time.toLocaleTimeString()}`}
+                                {`${(new Date(request.timestamp)).toLocaleDateString()} ${(new Date(request.timestamp)).toLocaleTimeString()}`}
                             </td>
                             <td>
                                 {request.groupNumber}
                             </td>
                             <td>
-                                {request.name}
+                                {request.student.studentName}
                             </td>
                             <td>
-                                {request.table}
+                                {request.spreadsheet.spreadsheetName}
                             </td>
                         </tr>
                     )}

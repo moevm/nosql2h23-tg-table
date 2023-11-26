@@ -18,7 +18,6 @@ def get_spreadsheets(request: Request):
 
 @router.post('/')
 def add_spreadsheet(request: Request, spreadsheet: Spreadsheet):
-    print(spreadsheet)
     spreadsheet = jsonable_encoder(spreadsheet)
     spreadsheet["_id"] = ObjectId()
     for sheet in spreadsheet["sheets"]:
@@ -54,4 +53,25 @@ def get_spreadsheet(_id: str, request: Request):
         {"_id": ObjectId(_id)}
     )
     return spreadsheet
+
+@router.put(
+    "/{_id}",
+    response_description="Operation Status"
+)
+def update_student(request: Request, spreadsheet: Spreadsheet):
+    spreadsheet = jsonable_encoder(spreadsheet)
+    spreadsheet["_id"] = ObjectId(spreadsheet["_id"])
+    for sheet in spreadsheet["sheets"]:
+        sheet["_id"] = ObjectId(sheet["_id"])
+        for column in sheet['columns']:
+            column["_id"] = ObjectId(column["_id"])
+    update_result = request.app.database["Spreadsheets"].update_one(
+        {"_id": ObjectId(spreadsheet["_id"])}, {"$set": {
+            "sheets": spreadsheet["sheets"]
+        }}
+    )
+    if update_result.modified_count == 0:
+        return {"status": 400}
+    else:
+        return {"status": 200}
 

@@ -1,22 +1,25 @@
 import React, {useEffect, useState} from 'react';
 import BaseDialog from "../base_dialog";
 import Graph from "../graph";
+import login from "../login";
 
 const PlotDialog = (props) => {
     const formatDate = (date)=>{
         return `${date.getDate()}.${date.getMonth()}.${date.getFullYear()}`
     }
     const createDataset = (reqs)=>{
-        let dates = reqs.map(e=>e.time)
+        let dates = reqs.map(e=>e.timestamp)
         dates = dates.filter((date, i, self) =>
-            self.findIndex(d => d.getTime() === date.getTime()) === i
+            self.findIndex(d => {
+                return d.getTime() === date.getTime()
+            }) === i
         )
         dates = Array.from(dates).sort((a,b)=>{
             return a.getTime()-b.getTime()
         })
         const newRequests = {
             dates: dates,
-            requestCount : dates.map(item=>(reqs.filter(e=>e.time.getTime()===item.getTime())).length)
+            requestCount : dates.map(item=>(reqs.filter(e=>e.timestamp.getTime()===item.getTime())).length)
         }
         return newRequests;
     }

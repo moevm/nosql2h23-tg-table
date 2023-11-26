@@ -39,7 +39,12 @@ const ImportDialog = (props) => {
                                 delete res.data[i].requestCount
                             }
                         }
-                        fetch("http://localhost:8000/students/",{
+                        if (props.properties.includes("timestamp")){
+                            for (const i of res.data.keys()){
+                                res.data[i].timestamp = new Date(res.data[i].timestamp)
+                            }
+                        }
+                        fetch(`http://localhost:8000/${props.path}`,{
                             method: 'POST',
                             headers: {
                                 "Content-Type": "application/json",

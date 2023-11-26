@@ -150,6 +150,7 @@ const Users = (props) => {
                 setAll={setUsers}
                 properties={properties}
                 filter={resetFilter}
+                path="students"
             />
             <div style={{display: "flex", flexDirection: "column", minWidth: 400}}>
                 <button

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime
 from typing import Annotated, Optional, List
 
 from bson import ObjectId
@@ -49,3 +50,31 @@ class SpreadsheetShort(MongoDbEntity):
 class Spreadsheet(SpreadsheetShort):
     sheets: List[Sheet]
     link: str = Field()
+
+
+class RequestStudent(BaseModel):
+    studentId: Optional[PyObjectId] = Field(efault=None)
+    studentName: str = Field()
+
+    class Config:
+        populate_by_name = True
+        json_encoders = {ObjectId: str}
+        arbitrary_types_allowed = True
+
+
+class RequestSpreadsheet(BaseModel):
+    spreadsheetId: Optional[PyObjectId] = Field(default=None)
+    spreadsheetName: str = Field()
+
+    class Config:
+        populate_by_name = True
+        json_encoders = {ObjectId: str}
+        arbitrary_types_allowed = True
+
+
+class RequestItem(MongoDbEntity):
+    student: RequestStudent = Field()
+    spreadsheet: RequestSpreadsheet = Field()
+    timestamp: datetime = Field()
+    groupNumber: str = Field()
+
