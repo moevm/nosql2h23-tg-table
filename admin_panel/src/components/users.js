@@ -75,7 +75,7 @@ const Users = (props) => {
                     setCurrentUsers(newUsers)
                     setUsers(newUsers)
                 } else {
-
+                    alert("Произошла ошибка")
                 }
             })
     }

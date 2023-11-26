@@ -6,10 +6,24 @@ import uvicorn
 
 from students_routes import router as students_router
 from login_routes import router as login_router
+from spreadsheets_routes import router as spreadsheets_router
 
 config = dotenv_values(".env")
 
 app = FastAPI()
+
+origins = [
+    "http://localhost",
+    "http://localhost:3000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.on_event("startup")
@@ -26,19 +40,7 @@ def shutdown_db_client():
 
 app.include_router(students_router, tags=["students"], prefix="/students")
 app.include_router(login_router, tags=["login"], prefix="/login")
-
-origins = [
-    "http://localhost",
-    "http://localhost:3000",
-]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+app.include_router(spreadsheets_router, tags=['spreadsheets'], prefix='/spreadsheets')
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

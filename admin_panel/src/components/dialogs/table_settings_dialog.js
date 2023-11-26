@@ -12,7 +12,6 @@ const TableSettingsDialog = (props) => {
         }
     }))
     useEffect(()=>{
-        console.log(props, sheetsSettings)
         if (sheetsSettings.length!==props.sheetQuantity){
             setCurrentSheet(0)
             setSheetsSettings([...Array(props.sheetQuantity).keys()].map(e=>{

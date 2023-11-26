@@ -6,6 +6,24 @@ import GroupList from "./group_list/group_list";
 import TableSettingsDialog from "./dialogs/table_settings_dialog";
 
 const Tables = (props) => {
+
+    useEffect(()=>{
+        props.setTitle("Таблицы")
+    })
+
+    useEffect(()=>{
+        fetch("http://localhost:8000/spreadsheets/",{
+            method: 'GET',
+            headers: {
+                "Content-Type": "application/json",
+            },
+        })
+            .then(res=>res.json())
+            .then(data=>{
+                setTablesList(data)
+            })
+    },[])
+
     const MenuPage = () => {
         window.location.href='/menu';
     }
@@ -15,55 +33,78 @@ const Tables = (props) => {
     }
 
     const deleteTable = ()=>{
-        setTablesList([...tablesList].filter(e=>{return e.id!==selectedId}))
+        setTablesList([...tablesList].filter(e=>{return e._id!==selectedId}))
         setIsDeleteDialogVisible(false)
     }
 
     const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false)
     const [selectedId,setSelectedId] = useState(-1)
     const [isAddDialogVisible, setIsAddDialogVisible] = useState(false)
-    const [tablesList, setTablesList] = useState([
-        {id: 1, name: '[Урмф] 0382, 0383'},
-        {id: 2, name: '[PR] 1243, 9999, 1010'},
-        {id: 3, name: '[БЖД] 0382'},])
+    const [tablesList, setTablesList] = useState([])
     const [groupList, setGroupsList] = useState([
-        {
-            groupNumber: "4382",
-        },
-        {
-            groupNumber: "4383"
-        }
     ])
     const [subject, setSubject] = useState("")
     const [link, setLink] = useState("")
     const [sheetQuantity, setSheetQuantity] = useState(1)
     const [isSettingsDialogVisible, setIsSettingsDialogVisible] = useState(false)
     const [addTableSettings,setAddTableSettings] = useState([])
+    const convertColumnToNumber = (column)=>{
+        let columnNumber = 0
+        for (let i = column.length-1;i>=0;i--){
+            const char = column[i]
+            columnNumber+= (char.charCodeAt(0) - 'A'.charCodeAt(0) + 1)*(26*(column.length-1-i)>0 ? 26*(column.length-1-i) : 1)
+        }
+        return columnNumber
+    }
     const addTable = ()=>{
         if (subject.length===0 || link.length===0 || groupList.length===0 || sheetQuantity===0 || addTableSettings===null){
             alert("Пожалуйста, заполните все поля!")
             return
         }
-        console.log(addTableSettings)
+        const sheets = addTableSettings.map(e=>{
+            return {
+                startRow: e.lastHeadRow+1,
+                endRow: e.lastRow,
+                headerRow: e.columnNamesRow,
+                startColumn: 1,
+                endColumn: convertColumnToNumber(e.lastColumn.toUpperCase()),
+                columns: []
+            }
+        })
         const table = {
-            id: tablesList[tablesList.length-1].id+1,
-            name: `[${subject}] ${groupList.map(e=>{return e.groupNumber}).join(", ")}`,
             link: link,
-            settings : addTableSettings
+            name: `[${subject}] ${groupList.map(e=>{return e.groupNumber}).join(", ")}`,
+            sheets : sheets
         }
-        const newTablesList = [...tablesList]
-        newTablesList.push(table)
-        setTablesList(newTablesList)
-        setSubject('')
-        setLink('')
-        setSheetQuantity(1)
-        setAddTableSettings([])
-        setGroupsList([])
-        setIsAddDialogVisible(false)
+        console.log(table)
+        fetch("http://localhost:8000/spreadsheets/",{
+            method: 'POST',
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(table)
+        })
+            .then(res=>res.json())
+            .then(data=>{
+                if (data.status===201){
+                    const _table = {
+                        _id: data._id,
+                        name: table.name,
+                    }
+                    const newTablesList = [...tablesList]
+                    newTablesList.push(_table)
+                    setTablesList(newTablesList)
+                    setSubject('')
+                    setLink('')
+                    setSheetQuantity(1)
+                    setAddTableSettings([])
+                    setGroupsList([])
+                    setIsAddDialogVisible(false)
+                } else {
+                    alert("Произошла ошибка")
+                }
+            })
     }
-    useEffect(()=>{
-        props.setTitle("Таблицы")
-    })
     return (
         <div>
             <BaseDialog visible={isDeleteDialogVisible} setVisible={setIsDeleteDialogVisible}>
@@ -201,12 +242,12 @@ const Tables = (props) => {
             </BaseDialog>
             <div>
                 {tablesList.map(table =>
-                    <div className='tablesListItem' key = {table.id} onClick={()=>
-                        TablePage(table.id)}>
+                    <div className='tablesListItem' key = {table._id} onClick={()=>
+                        TablePage(table._id)}>
                         {table.name}
                         <CloseIcon sx={{float: "right", color: "#EE0100"}} onClick={(e)=>{
                             e.stopPropagation()
-                            setSelectedId(table.id)
+                            setSelectedId(table._id)
                             setIsDeleteDialogVisible(true)}}/>
                     </div>
                 )}
