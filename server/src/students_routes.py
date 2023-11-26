@@ -59,7 +59,7 @@ def update_student(request: Request, student: Student):
     "/delete_student",
     response_description="Operations status"
 )
-def update_student(request: Request, student: Student):
+def delete_student(request: Request, student: Student):
     student = jsonable_encoder(student)
     delete_result = request.app.database["Students"].delete_one(
         {"_id": ObjectId(student["_id"])}
@@ -73,7 +73,7 @@ def update_student(request: Request, student: Student):
     "/",
     response_description="Operation status"
 )
-def import_student(request: Request, students: List[Student]):
+def import_students(request: Request, students: List[Student]):
     students = jsonable_encoder(students)
     delete_result = request.app.database["Students"].delete_many({})
     for student in students:
@@ -85,3 +85,5 @@ def import_student(request: Request, students: List[Student]):
         return {"status": 200}
     else:
         return {"status": 400}
+
+

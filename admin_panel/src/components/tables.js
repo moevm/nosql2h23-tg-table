@@ -33,16 +33,31 @@ const Tables = (props) => {
     }
 
     const deleteTable = ()=>{
-        setTablesList([...tablesList].filter(e=>{return e._id!==selectedId}))
-        setIsDeleteDialogVisible(false)
+        const table = tablesList.find(e=>e._id===selectedId)
+        fetch("http://localhost:8000/spreadsheets",{
+            method: 'DELETE',
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(table)
+        })
+            .then(res=>res.json())
+            .then((data)=>{
+                if (data.status===200){
+                    let newTables= [...tablesList].filter(e=>e._id!==selectedId._id)
+                    setTablesList(newTables)
+                    setIsDeleteDialogVisible(false)
+                } else {
+                    alert("Удаление не удалось")
+                }
+            })
     }
 
     const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false)
     const [selectedId,setSelectedId] = useState(-1)
     const [isAddDialogVisible, setIsAddDialogVisible] = useState(false)
     const [tablesList, setTablesList] = useState([])
-    const [groupList, setGroupsList] = useState([
-    ])
+    const [groupList, setGroupsList] = useState([])
     const [subject, setSubject] = useState("")
     const [link, setLink] = useState("")
     const [sheetQuantity, setSheetQuantity] = useState(1)
@@ -76,7 +91,6 @@ const Tables = (props) => {
             name: `[${subject}] ${groupList.map(e=>{return e.groupNumber}).join(", ")}`,
             sheets : sheets
         }
-        console.log(table)
         fetch("http://localhost:8000/spreadsheets/",{
             method: 'POST',
             headers: {

@@ -32,3 +32,26 @@ def add_spreadsheet(request: Request, spreadsheet: Spreadsheet):
     else:
         return {"status": 400}
 
+
+@router.delete(
+    "/",
+    response_description="Operations status"
+)
+def delete_student(request: Request, spreadsheet: SpreadsheetShort):
+    spreadsheet = jsonable_encoder(spreadsheet)
+    delete_result = request.app.database["Spreadsheets"].delete_one(
+        {"_id": ObjectId(spreadsheet["_id"])}
+    )
+    if delete_result.deleted_count == 0:
+        return {"status": 400}
+    else:
+        return {"status": 200}
+
+
+@router.get('/{_id}', response_description="List of all spreadsheets", response_model=Spreadsheet)
+def get_spreadsheet(_id: str, request: Request):
+    spreadsheet = request.app.database['Spreadsheets'].find_one(
+        {"_id": ObjectId(_id)}
+    )
+    return spreadsheet
+
