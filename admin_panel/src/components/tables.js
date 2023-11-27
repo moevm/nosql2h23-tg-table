@@ -44,7 +44,7 @@ const Tables = (props) => {
             .then(res=>res.json())
             .then((data)=>{
                 if (data.status===200){
-                    let newTables= [...tablesList].filter(e=>e._id!==selectedId._id)
+                    let newTables= [...tablesList].filter(e=>e._id!==selectedId)
                     setTablesList(newTables)
                     setIsDeleteDialogVisible(false)
                 } else {
