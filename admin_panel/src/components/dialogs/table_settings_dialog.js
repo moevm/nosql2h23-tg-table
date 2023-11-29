@@ -38,7 +38,6 @@ const TableSettingsDialog = (props) => {
             }
         })
         setSheetsSettings(updatedSettings)
-        console.log(updatedSettings)
     }
 
     const addSettings = ()=>{

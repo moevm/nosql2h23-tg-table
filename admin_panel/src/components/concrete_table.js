@@ -48,7 +48,6 @@ const ConcreteTable = (props) => {
     const [spreadsheet,setSpreadSheet] = useState(null)
     const onChangeItem = (value)=>{
         setCurrentSheetId(value)
-        // console.log(spreadsheet.sheets[value])
     }
 
     const onChangeAccesible = (columnIndex, value)=>{
