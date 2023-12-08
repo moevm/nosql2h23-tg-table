@@ -11,3 +11,14 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${DB_ROOT_PWD}
     volumes:
       - ./mongo/mongo_init.js:/docker-entrypoint-initdb.d/mongo-init.js
+
+  server:
+    build:
+      context: ./server/
+    container_name: 'telegramBot_server'
+    ports:
+      - ${SERVER_PORTS}
+    env_file:
+      - .env
+    depends_on:
+      - mongodb

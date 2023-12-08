@@ -9,7 +9,7 @@ router = APIRouter()
 
 
 @router.get('/', response_description="List of all students", response_model=List[StudentWithRequests])
-def get_students(request: Request):
+async def get_students(request: Request):
     students = list(request.app.database["Students"].find())
     for student in students:
         request_count = len(list(request.app.database["Requests"].find({
