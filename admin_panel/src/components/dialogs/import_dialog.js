@@ -20,7 +20,6 @@ const ImportDialog = (props) => {
             reader.readAsText(file);
             reader.onload = function() {
                 const res = JSON.parse(reader.result)
-                console.log(res)
                 if (res.hasOwnProperty("data")){
                     let flag = true
                     outerLoop:
@@ -53,7 +52,6 @@ const ImportDialog = (props) => {
                         })
                             .then(res=>res.json())
                             .then(data=>{
-                                console.log(data)
                                 if (data.status===200){
                                     props.setAll(res.data)
                                     props.setCurrent(res.data)

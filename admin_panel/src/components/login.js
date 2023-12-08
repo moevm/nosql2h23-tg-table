@@ -18,7 +18,6 @@ const Login = (props) => {
         })
             .then(res=>res.json())
             .then(data=>{
-                console.log(data)
                 if (data.status===200){
                     window.location.href = "/menu"
                 } else {
