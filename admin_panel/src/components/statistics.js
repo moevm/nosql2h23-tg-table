@@ -60,8 +60,6 @@ const Statistics = (props) => {
     const [isImportDialogVisible, setIsImportDialogVisible] = useState(false)
 
     const resetFilter = ()=>{
-        // const select = document.getElementById("select_stat")
-        // select.value = ""
         setCurrentFilter("")
         setSearchValue("")
     }
