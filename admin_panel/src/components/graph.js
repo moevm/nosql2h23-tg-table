@@ -22,7 +22,16 @@ ChartJS.register(
 );
 
 export function Graph(props){
-    const [data,setData] = useState({ labels: [], datasets: [{ data: [] }] });
+    const [data,setData] = useState({
+            labels: props.dates,
+            datasets: [{
+                label: "Обращения",
+                backgroundColor: 'rgba(40, 96, 173, 1)',
+                borderColor: 'rgba(40, 96, 173, 1)',
+                borderWidth: 1,
+                data: props.data,
+            }]
+        });
     useEffect(() => {
         setData({
             labels: props.dates,
@@ -40,6 +49,13 @@ export function Graph(props){
         plugins: {
             legend: {
                 position: 'bottom   ',
+            },
+        },
+        scales: {
+            y: {
+                ticks: {
+                    stepSize: 1,
+                },
             },
         },
     };

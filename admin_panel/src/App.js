@@ -10,7 +10,6 @@ import Menu from "./components/menu";
 import Tables from "./components/tables";
 import Statistics from "./components/statistics";
 import Users from "./components/users";
-import Concrete_table from "./components/concrete_table";
 import ConcreteTable from "./components/concrete_table";
 
 

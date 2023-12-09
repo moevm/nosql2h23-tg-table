@@ -19,13 +19,13 @@ const PlotDialog = (props) => {
     }
 
     const formatDate = (date)=>{
-        return `${date.getDate()}.${date.getMonth()}.${date.getFullYear()}`
+        return date.toLocaleDateString()
     }
     const createDataset = (reqs)=>{
         let dates = reqs.map(e=>e.timestamp)
         dates = dates.filter((date, i, self) =>
             self.findIndex(d => {
-                return d.getTime() === date.getTime()
+                return (d.getFullYear() === date.getFullYear() && d.getMonth() === date.getMonth() && d.getDate() === date.getDate())
             }) === i
         )
         dates = Array.from(dates).sort((a,b)=>{
@@ -33,7 +33,10 @@ const PlotDialog = (props) => {
         })
         const newRequests = {
             dates: dates,
-            requestCount: dates.map(item => (reqs.filter(e => e.timestamp.getTime() === item.getTime())).length)
+            requestCount: dates.map(item => (reqs.filter(e =>
+                e.timestamp.getFullYear() === item.getFullYear()
+                && e.timestamp.getMonth() === item.getMonth()
+                && e.timestamp.getDate()===item.getDate())).length)
         }
         return newRequests;
     }

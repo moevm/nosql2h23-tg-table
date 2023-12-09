@@ -71,6 +71,9 @@ const Statistics = (props) => {
         if (searchValue.length>0){
             newRequests = [...requests].filter(e=>{
                 // e[currentFilter].toString().
+                if (currentFilter==='timestamp'){
+                    return `${_.get(e,`${currentFilter}`).toLocaleDateString()} ${_.get(e,`${currentFilter}`).toLocaleTimeString()}`.includes(searchValue)
+                }
                 return  _.get(e,`${currentFilter}`).toString().includes(searchValue)
             })
         } else {
