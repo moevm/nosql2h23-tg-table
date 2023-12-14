@@ -68,7 +68,7 @@ const TableSettingsDialog = (props) => {
                     <tbody style={{textAlign:"end"}}>
                         <tr>
                             <td>
-                                <span style={{marginRight:10}}>Настройки для листа №: </span>
+                                <span style={{marginRight:10}}>Настройки для листа  : </span>
                             </td>
                             <td style={{textAlign:"start"}}>
                                 <select
@@ -83,33 +83,61 @@ const TableSettingsDialog = (props) => {
                         </tr>
                         <tr>
                             <td>
-                                <span style={{marginRight:10}}>Номер последней строки в заголовке: </span>
+                                <span>Номер последней строки в заголовке</span>
+                                <span style={{marginRight:3, color:"red"}}>* </span>
+                                <span style={{marginRight:10}}>: </span>
                             </td>
                             <td>
                                 <input
-                                    type="number"
+                                    type="text"
                                     className="myInput"
                                     value={sheetsSettings[currentSheet].lastHeadRow}
-                                    onChange={(e)=>{updateSheetsSettings("lastHeadRow",Number(e.target.value))}}
+                                    onChange={(e)=>{
+                                        const value = parseInt(e.target.value,10)
+                                        if (e.target.value === ''){
+                                            updateSheetsSettings("lastHeadRow",0)
+                                        } else {
+                                            if (!isNaN(value)){
+                                                updateSheetsSettings("lastHeadRow",value)
+                                            } else {
+                                                alert('Вы пытаетесь ввести некорректные данные. Пожалуйста проверьте и повторите попытку.')
+                                            }
+                                        }
+                                    }}
                                 />
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                <span style={{marginRight:10}}>Номер строки, в которой находятся названия колонок: </span>
+                                <span>Номер строки, в которой находятся названия колонок</span>
+                                <span style={{marginRight:3, color:"red"}}>* </span>
+                                <span style={{marginRight:10}}>: </span>
                             </td>
                             <td>
                                 <input
-                                    type="number"
+                                    type="text"
                                     className="myInput"
                                     value={sheetsSettings[currentSheet].columnNamesRow}
-                                    onChange={(e)=>{updateSheetsSettings("columnNamesRow",Number(e.target.value))}}
+                                    onChange={(e)=>{
+                                        const value = parseInt(e.target.value,10)
+                                        if (e.target.value === ''){
+                                            updateSheetsSettings("columnNamesRow",0)
+                                        } else {
+                                            if (!isNaN(value)){
+                                                updateSheetsSettings("columnNamesRow",value)
+                                            } else {
+                                                alert('Вы пытаетесь ввести некорректные данные. Пожалуйста проверьте и повторите попытку.')
+                                            }
+                                        }
+                                    }}
                                 />
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                <span style={{marginRight:10}}>Номер последней колоноки: </span>
+                                <span>Номер последней колоноки</span>
+                                <span style={{marginRight:3, color:"red"}}>* </span>
+                                <span style={{marginRight:10}}>: </span>
                             </td>
                             <td>
                                 <input
@@ -117,21 +145,41 @@ const TableSettingsDialog = (props) => {
                                     className="myInput"
                                     placeholder="Примеры: A | G | AA"
                                     value={sheetsSettings[currentSheet].lastColumn}
-                                    onChange={(e)=>{updateSheetsSettings("lastColumn",e.target.value)}}
+                                    onChange={(e)=>{
+                                        updateSheetsSettings("lastColumn",e.target.value)
+                                    }}
                                 />
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                <span style={{marginRight:10}}>Номер последней строки с данными: </span>
+                                <span>Номер последней строки с данными</span>
+                                <span style={{marginRight:3, color:"red"}}>* </span>
+                                <span style={{marginRight:10}}>: </span>
                             </td>
                             <td>
                                 <input
-                                    type="number"
+                                    type="text"
                                     className="myInput"
                                     value={sheetsSettings[currentSheet].lastRow}
-                                    onChange={(e)=>{updateSheetsSettings("lastRow",Number(e.target.value))}}
+                                    onChange={(e)=>{
+                                        const value = parseInt(e.target.value,10)
+                                        if (e.target.value === ''){
+                                            updateSheetsSettings("lastRow",0)
+                                        } else {
+                                            if (!isNaN(value)){
+                                                updateSheetsSettings("lastRow",value)
+                                            } else {
+                                                alert('Вы пытаетесь ввести некорректные данные. Пожалуйста проверьте и повторите попытку.')
+                                            }
+                                        }
+                                    }}
                                 />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colSpan={2}>
+                                <span style={{marginRight:120, color:"red"}}>* -- поля, обязательные для заполения</span>
                             </td>
                         </tr>
                     </tbody>
