@@ -13,7 +13,7 @@ def get_spreadsheets(request: Request):
     requests = list(request.app.database["Requests"].aggregate([
         {
             "$lookup": {
-                "from": "Students",
+                    "from": "Students",
                 "localField": "student.studentId",
                 "foreignField": "_id",
                 "as": "tmpField"

@@ -1,3 +1,4 @@
+import uvicorn
 from fastapi import FastAPI
 from pymongo import MongoClient
 from starlette.middleware.cors import CORSMiddleware
@@ -24,11 +25,13 @@ app.add_middleware(
                    "Authorization"]
 )
 
+ATLAS_URI='mongodb://localhost:27017/?retryWrites=true&w=majority'
+DB_NAME='TelegramBotNoSQL'
 
 @app.on_event("startup")
 def startup_db_client():
-    app.mongodb_client = MongoClient(os.environ['DB_URL'])
-    app.database = app.mongodb_client[os.environ['DB_NAME']]
+    app.mongodb_client = MongoClient(ATLAS_URI)
+    app.database = app.mongodb_client[DB_NAME]
 
 
 @app.on_event("shutdown")
@@ -40,3 +43,6 @@ app.include_router(students_router, tags=["students"], prefix="/students")
 app.include_router(login_router, tags=["login"], prefix="/login")
 app.include_router(spreadsheets_router, tags=['spreadsheets'], prefix='/spreadsheets')
 app.include_router(requests_router, tags=['requests'], prefix='/requests')
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)

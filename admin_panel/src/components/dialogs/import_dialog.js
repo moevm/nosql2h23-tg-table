@@ -14,6 +14,9 @@ const ImportDialog = (props) => {
         }
     }
 
+    const studentsProperties=['_id','groupNumber','name','telegramId']
+    const requestsProperties = ["_id","timestamp","groupNumber","student","spreadsheet"]
+
     const applyImport = ()=>{
         if (file){
             let reader = new FileReader();
@@ -21,53 +24,75 @@ const ImportDialog = (props) => {
             reader.onload = function() {
                 const res = JSON.parse(reader.result)
                 if (res.hasOwnProperty("data")){
-                    let flag = true
-                    outerLoop:
-                    for (const element of res.data){
-                        for (const property of props.properties){
-                            if (!element.hasOwnProperty(property)){
-                                flag=false
-                                break outerLoop
-                            }
-                        }
-                    }
-                    if (flag){
-                        if (props.properties.includes("time")){
-                            for (const i of res.data.keys()){
-                                res.data[i].time = new Date(res.data[i].time)
-                                delete res.data[i].requestCount
-                            }
-                        }
-                        if (props.properties.includes("timestamp")){
-                            for (const i of res.data.keys()){
-                                res.data[i].timestamp = new Date(res.data[i].timestamp)
-                            }
-                        }
-                        fetch(`http://localhost:8000/${props.path}`,{
-                            method: 'POST',
-                            headers: {
-                                "Content-Type": "application/json",
-                            },
-                            body: JSON.stringify(res.data)
-                        })
-                            .then(res=>res.json())
-                            .then(data=>{
-                                if (data.status===200){
-                                    props.setAll(res.data)
-                                    props.setCurrent(res.data)
-                                    props.filter()
-                                    props.setVisible(false)
-                                    setFile(null)
-                                    setFilename('')
-                                } else {
-                                    alert("Ошибка")
+                    if (res.data.hasOwnProperty('studentsData') && res.data.hasOwnProperty('requestsData')){
+                        let flag = true
+                        outerLoop:
+                            for (const element of res.data.studentsData){
+                                for (const property of studentsProperties){
+                                    if (!element.hasOwnProperty(property)){
+                                        flag=false
+                                        break outerLoop
+                                    }
                                 }
+                            }
+                        outerLoop:
+                            for (const element of res.data.requestsData){
+                                for (const property of requestsProperties){
+                                    if (!element.hasOwnProperty(property)){
+                                        flag=false
+                                        break outerLoop
+                                    }
+                                }
+                            }
+                        if (flag){
+                            for (const i of res.data.requestsData.keys()){
+                                res.data.requestsData[i].timestamp = new Date(res.data.requestsData[i].timestamp)
+                            }
+                            fetch(`http://localhost:8000/students`,{
+                                method: 'POST',
+                                headers: {
+                                    "Content-Type": "application/json",
+                                },
+                                body: JSON.stringify(res.data.studentsData)
                             })
+                                .then(res=>res.json())
+                                .then(data=>{
+                                    if (data.status===200){
+                                        setFile(null)
+                                        setFilename('')
+                                    } else {
+                                        flag = false
+                                        alert("Ошибка")
+                                    }
+                                })
+                            fetch(`http://localhost:8000/requests`,{
+                                method: 'POST',
+                                headers: {
+                                    "Content-Type": "application/json",
+                                },
+                                body: JSON.stringify(res.data.requestsData)
+                            })
+                                .then(res=>res.json())
+                                .then(data=>{
+                                    if (data.status===200){
+                                        setFile(null)
+                                        setFilename('')
+                                    } else {
+                                        flag = false
+                                        alert("Ошибка")
+                                    }
+                                })
+                            if (flag){
+                                props.setVisible(false)
+                            }
+                        } else {
+                            alert("Ошибка в содержимом файла")
+                        }
                     } else {
-                        alert("Ошибка в формате файла")
+                        alert("Ошибка в содержимом файла")
                     }
                 } else {
-                    alert("Ошибка в формате файла")
+                    alert("Ошибка в содержимом файла")
                 }
             };
             reader.onerror = function(){

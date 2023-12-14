@@ -2,8 +2,6 @@ import React, {useEffect, useState} from 'react';
 import AutoGraphIcon from '@mui/icons-material/AutoGraph';
 import SearchIcon from '@mui/icons-material/Search';
 import PlotDialog from "./dialogs/plot_dialog";
-import ExportDialog from "./dialogs/export_dialog";
-import ImportDialog from "./dialogs/import_dialog";
 import _ from "lodash";
 
 const Statistics = (props) => {
@@ -32,8 +30,6 @@ const Statistics = (props) => {
         window.location.href='/menu';
     }
 
-    const properties = ["_id","timestamp","groupNumber","student","spreadsheet"]
-
     const filterParams = [{
         name: "Все",
         value: ""
@@ -56,8 +52,6 @@ const Statistics = (props) => {
     const [currentFilter, setCurrentFilter] = useState("")
     const [searchValue, setSearchValue] = useState("")
     const [isPlotVisible, setIsPlotVisible] = useState(false)
-    const [isExportDialogVisible, setIsExportDialogVisible] = useState(false)
-    const [isImportDialogVisible, setIsImportDialogVisible] = useState(false)
 
     const resetFilter = ()=>{
         setCurrentFilter("")
@@ -87,36 +81,6 @@ const Statistics = (props) => {
                 setVisible={setIsPlotVisible}
                 requests={currentRequests}
             />
-            <ExportDialog
-                visible={isExportDialogVisible}
-                setVisible={setIsExportDialogVisible}
-                data={currentRequests}
-            />
-            <ImportDialog
-                visible={isImportDialogVisible}
-                setVisible={setIsImportDialogVisible}
-                setCurrent={setCurrentRequests}
-                setAll={setRequests}
-                properties={properties}
-                filter={resetFilter}
-                path="requests"
-            />
-            <div style={{display: "flex", flexDirection: "column", minWidth: 400}}>
-                <button
-                    className='defaultButton'
-                    style={{background: '#62A3E7', marginLeft:"auto", fontSize: 18, minWidth: 100}}
-                    onClick={()=>{setIsImportDialogVisible(true)}}
-                >
-                    Импорт
-                </button>
-                <button
-                    className='defaultButton'
-                    style={{background: '#62A3E7', marginTop: 15, marginLeft:"auto", fontSize: 18, minWidth: 100}}
-                    onClick={()=>{setIsExportDialogVisible(true)}}
-                >
-                    Экспорт
-                </button>
-            </div>
             <div style={{display:"flex",flexDirection:"row"}}>
                 <div className="params">
                     <span>Параметр:</span>

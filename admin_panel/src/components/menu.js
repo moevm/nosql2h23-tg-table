@@ -1,5 +1,7 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import "../style/menu.css"
+import ExportDialog from "./dialogs/export_dialog";
+import ImportDialog from "./dialogs/import_dialog";
 
 
 const Menu = (props) => {
@@ -7,6 +9,32 @@ const Menu = (props) => {
     useEffect(()=>{
         props.setTitle("Меню")
     })
+
+    useEffect(()=>{
+        fetch("http://localhost:8000/students/all",{
+            method: 'GET',
+            headers: {
+                "Content-Type": "application/json",
+            },
+        })
+            .then(res=>res.json())
+            .then(data=>{
+                setStudentsData(data)
+            })
+        fetch(`http://localhost:8000/requests`,{
+            method: 'GET',
+            headers: {
+                "Content-Type": "application/json",
+            },
+        })
+            .then(res=>res.json())
+            .then(data=>{
+                const requestsWithCorrectTime = data.map(e=>{
+                    return {...e,timestamp:new Date(e.timestamp)}
+                })
+                setRequestsData((requestsWithCorrectTime))
+            })
+    },[])
 
     const TablePage = () => {
         window.location.href='/tables';
@@ -24,8 +52,25 @@ const Menu = (props) => {
         window.location.href='/';
     }
 
+    const [isExportDialogVisible, setIsExportDialogVisible] = useState(false)
+    const [isImportDialogVisible, setIsImportDialogVisible] = useState(false)
+    const [studentsData, setStudentsData] = useState(null)
+    const [requestsData, setRequestsData] = useState(null)
+
     return (
         <div style={{display: "flex", flexDirection: "column", alignItems: "center"}}>
+            <ExportDialog
+                visible={isExportDialogVisible}
+                setVisible={setIsExportDialogVisible}
+                data={{
+                    studentsData,
+                    requestsData
+                }}
+            />
+            <ImportDialog
+                visible={isImportDialogVisible}
+                setVisible={setIsImportDialogVisible}
+            />
             <button
                 className='MenuButton'
                 style={{marginTop: 50}}
@@ -44,6 +89,23 @@ const Menu = (props) => {
                 onClick={StatPage}
             >
                 Статистика
+            </button>
+            <button
+                className='defaultButton'
+                style={{background: '#62A3E7', marginTop: 20, fontSize: 18, minWidth: 100}}
+                onClick={()=>{
+                    setIsImportDialogVisible(true)
+                    console.log(studentsData,requestsData)
+                }}
+            >
+                Импорт
+            </button>
+            <button
+                className='defaultButton'
+                style={{background: '#62A3E7', marginTop: 20, fontSize: 18, minWidth: 100}}
+                onClick={()=>{setIsExportDialogVisible(true)}}
+            >
+                Экспорт
             </button>
             <button
                 className='defaultButton'

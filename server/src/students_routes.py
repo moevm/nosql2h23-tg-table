@@ -9,13 +9,19 @@ router = APIRouter()
 
 
 @router.get('/', response_description="List of all students", response_model=List[StudentWithRequests])
-async def get_students(request: Request):
+async def get_students_requests(request: Request):
     students = list(request.app.database["Students"].find())
     for student in students:
         request_count = len(list(request.app.database["Requests"].find({
             "student.studentId": ObjectId(student["_id"])
         })))
         student["requestCount"] = request_count
+    return students
+
+
+@router.get('/all', response_description="List of all students", response_model=List[Student])
+async def get_students(request: Request):
+    students = list(request.app.database["Students"].find())
     return students
 
 
@@ -69,6 +75,7 @@ def delete_student(request: Request, student: Student):
     else:
         return {"status": 200}
 
+
 @router.post(
     "/",
     response_description="Operation status"
@@ -85,5 +92,3 @@ def import_students(request: Request, students: List[Student]):
         return {"status": 200}
     else:
         return {"status": 400}
-
-
