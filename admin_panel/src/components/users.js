@@ -3,6 +3,8 @@ import "../style/users.css"
 import CreateIcon from '@mui/icons-material/Create';
 import AddUserDialog from "./dialogs/add_user_dialog";
 import EditUserDialog from "./dialogs/edit_user_dialog";
+import SearchIcon from "@mui/icons-material/Search";
+import _ from "lodash";
 
 const Users = (props) => {
     useEffect(()=>{
@@ -32,20 +34,34 @@ const Users = (props) => {
     const [isEditUserDialogVisible, setIsEditUserDialogVisible] = useState(false)
     const [currentEditUser, setCurrentEditUser] = useState({_id:"",name:"",telegramId:"",groupNumber:""})
     const [isAddUserDialogVisible,setIsAddUserDialogVisible] = useState(false)
+    const [searchValues,setSearchValues] = useState([
+        '','','',''
+    ])
 
-    const resetFilter = ()=>{
-        const select = document.getElementById("select_user")
-        select.value = ""
+    const setSearchValue = (index,value)=>{
+        const newSearchValues = searchValues.map((elem,ind)=>{
+            if (ind===index){
+                return value
+            } else{
+                return  elem
+            }
+        })
+        setSearchValues(newSearchValues)
     }
-
-    const filterUsers = (param)=>{
-        if (param===""){
-            setCurrentUsers(users)
-        } else {
-            const newUsers = [...users].filter(e=>e.groupNumber===param)
-            setCurrentUsers(newUsers)
-        }
-    }
+    //
+    // const resetFilter = ()=>{
+    //     const select = document.getElementById("select_user")
+    //     select.value = ""
+    // }
+    //
+    // const filterUsers = (param)=>{
+    //     if (param===""){
+    //         setCurrentUsers(users)
+    //     } else {
+    //         const newUsers = [...users].filter(e=>e.groupNumber===param)
+    //         setCurrentUsers(newUsers)
+    //     }
+    // }
     const addUser = (user)=>{
         const body = {
             groupNumber: user.groupNumber,
@@ -123,6 +139,33 @@ const Users = (props) => {
         setCurrentEditUser(user)
         setIsEditUserDialogVisible(true)
     }
+
+    const filterParams = ["groupNumber","name","telegramId",'requestCount']
+
+    const filterUsers = ()=>{
+        let newUsers = [...currentUsers]
+        for (let i=0;i<4;i++){
+            if (searchValues[i].length>0){
+                const searchValue = searchValues[i]
+                const currentFilter = filterParams[i]
+                if (i===3){
+                    newUsers= newUsers.filter(e=>{
+                        return  _.get(e,`${currentFilter}`)===Number(searchValue)
+                    })
+                } else {
+                    newUsers= newUsers.filter(e=>{
+                        return  _.get(e,`${currentFilter}`).toString().toLowerCase().includes(searchValue.toLowerCase())
+                    })
+                }
+            }
+        }
+        setCurrentUsers(newUsers)
+    }
+
+    const clearFilterValues = ()=>{
+        setCurrentUsers(users)
+        setSearchValues(['','','',''])
+    }
     return (
         <div >
             <EditUserDialog
@@ -132,34 +175,78 @@ const Users = (props) => {
                 deleteUserFun={deleteUser}
                 user={currentEditUser}
             />
-            <div className="params">
-                <span>Параметр:</span>
-                <select id="select_user" style={{marginLeft: 10, fontSize: 18}} onChange={(event)=>{filterUsers(event.target.value)}}>
-                    <option value={""}>
-                        Все
-                    </option>
-                    {(Array.from(new Set(users.map(e=>e.groupNumber))).map(number=>
-                        <option key={number} value={number}>
-                            {number}
-                        </option>
-                    ))}
-                </select>
-            </div>
+            {/*<div className="params">*/}
+            {/*    <span>Параметр:</span>*/}
+            {/*    <select id="select_user" style={{marginLeft: 10, fontSize: 18}} onChange={(event)=>{filterUsers(event.target.value)}}>*/}
+            {/*        <option value={""}>*/}
+            {/*            Все*/}
+            {/*        </option>*/}
+            {/*        {(Array.from(new Set(users.map(e=>e.groupNumber))).map(number=>*/}
+            {/*            <option key={number} value={number}>*/}
+            {/*                {number}*/}
+            {/*            </option>*/}
+            {/*        ))}*/}
+            {/*    </select>*/}
+            {/*</div>*/}
             <div style={{overflow: "auto",maxHeight:300}}>
-                <table className="MyTable" style={{minWidth:700}}>
+                {currentUsers.length>0 ? <table className="MyTable" style={{minWidth:700}}>
                     <thead>
                     <tr>
                         <th>
-                            Группа
+                            <div style={{display: "flex", flexDirection: "row", justifyContent: "center"}}>
+                                <span  style={{marginLeft: 5, fontSize:18}}>
+                                   Группа
+                                </span>
+                                <div style={{marginLeft: 10, padding: 0}}>
+                                    <input className="myInput"
+                                           style={{width:100,fontSize:17,paddingTop:0, background: "#C0DAF5"}}
+                                           value={searchValues[0]}
+                                           onChange={(e)=>{setSearchValue(0,e.target.value)}}/>
+                                    <SearchIcon style={{verticalAlign:"middle"}}/>
+                                </div>
+                            </div>
                         </th>
                         <th>
-                            ФИО
+                            <div style={{display: "flex", flexDirection: "row", justifyContent: "center"}}>
+                                <span  style={{marginLeft: 5, fontSize:18}}>
+                                   ФИО
+                                </span>
+                                <div style={{marginLeft: 10, padding: 0}}>
+                                    <input className="myInput"
+                                           style={{width:100,fontSize:17,paddingTop:0, background: "#C0DAF5"}}
+                                           value={searchValues[1]}
+                                           onChange={(e)=>{setSearchValue(1,e.target.value)}}/>
+                                    <SearchIcon style={{verticalAlign:"middle"}}/>
+                                </div>
+                            </div>
                         </th>
                         <th>
-                            Telegram_ID
+                            <div style={{display: "flex", flexDirection: "row", justifyContent: "center"}}>
+                                <span  style={{marginLeft: 5, fontSize:18}}>
+                                   Telegram_ID
+                                </span>
+                                <div style={{marginLeft: 10, padding: 0}}>
+                                    <input className="myInput"
+                                           style={{width:100,fontSize:17,paddingTop:0, background: "#C0DAF5"}}
+                                           value={searchValues[2]}
+                                           onChange={(e)=>{setSearchValue(2,e.target.value)}}/>
+                                    <SearchIcon style={{verticalAlign:"middle"}}/>
+                                </div>
+                            </div>
                         </th>
                         <th>
-                            Обращения
+                            <div style={{display: "flex", flexDirection: "row", justifyContent: "center"}}>
+                                <span  style={{marginLeft: 5, fontSize:18}}>
+                                   Обращения
+                                </span>
+                                <div style={{marginLeft: 10, padding: 0}}>
+                                    <input className="myInput"
+                                           style={{width:100,fontSize:17,paddingTop:0, background: "#C0DAF5"}}
+                                           value={searchValues[3]}
+                                           onChange={(e)=>{setSearchValue(3,e.target.value)}}/>
+                                    <SearchIcon style={{verticalAlign:"middle"}}/>
+                                </div>
+                            </div>
                         </th>
                         <th style={{background: "#1A4297", color: "white"}}>
                             Править
@@ -187,7 +274,31 @@ const Users = (props) => {
                         </tr>
                     )}
                     </tbody>
-                </table>
+                </table> : <span style={{fontSize:30,fontFamily:"Comfortaa",color:"white"}}>Данные не найдены</span>}
+            </div>
+            <div style={{display: "flex", flexDirection: "column"}}>
+                <div>
+                    <button
+                        className='defaultButton'
+                        style={{marginLeft: 60, fontSize: 15, marginTop: 25,
+                            paddingLeft: 10, paddingRight: 10, background: "#62A3E7",
+                            border: '2px solid rgba(40, 96, 173, 1)'}}
+                        onClick={()=>filterUsers()}
+                    >
+                        Применить фильтры
+                    </button>
+                    <button
+                        className='defaultButton'
+                        style={{marginLeft: 60, fontSize: 15, marginTop: 25,
+                            paddingLeft: 10, paddingRight: 10, background: "#62A3E7",
+                            border: '2px solid rgba(40, 96, 173, 1)'}}
+                        onClick={()=> {
+                            clearFilterValues()
+                        }}
+                    >
+                        Сбросить фильтрацию
+                    </button>
+                </div>
             </div>
             <div style={{display: "flex", flexDirection: "column"}}>
                 <AddUserDialog visible={isAddUserDialogVisible} setVisible={setIsAddUserDialogVisible} addUserFun={addUser}/>
