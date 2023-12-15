@@ -30,7 +30,7 @@ const Statistics = (props) => {
         window.location.href='/menu';
     }
 
-    const filterParams = ["timestamp","groupNumber","student.studentName","spreadsheet.spreadsheetName"]
+    const filterParams = ["groupNumber","student.studentName","spreadsheet.spreadsheetName"]
 
     const [requests,setRequests] = useState([])
     const [currentRequests, setCurrentRequests] = useState([])
@@ -72,9 +72,6 @@ const Statistics = (props) => {
                 const searchValue = searchValues[i]
                 const currentFilter = filterParams[i]
                  newRequests= newRequests.filter(e=>{
-                    if (currentFilter==='timestamp'){
-                        return `${_.get(e,`${currentFilter}`).toLocaleDateString()} ${_.get(e,`${currentFilter}`).toLocaleTimeString()}`.includes(searchValue)
-                    }
                     return  _.get(e,`${currentFilter}`).toString().toLowerCase().includes(searchValue.toLowerCase())
                 })
             }
@@ -185,7 +182,7 @@ const Statistics = (props) => {
                                     <input className="myInput"
                                            style={{width:100,fontSize:17,paddingTop:0, background: "#C0DAF5"}}
                                            value={searchValues[0]}
-                                           onChange={(e)=>{setSearchValue(1,e.target.value)}}/>
+                                           onChange={(e)=>{setSearchValue(0,e.target.value)}}/>
                                     <SearchIcon style={{verticalAlign:"middle"}}/>
                                 </div>
                             </div>
@@ -200,7 +197,7 @@ const Statistics = (props) => {
                                     <input className="myInput"
                                            style={{width:100,fontSize:17,paddingTop:0, background: "#C0DAF5"}}
                                            value={searchValues[1]}
-                                           onChange={(e)=>{setSearchValue(2,e.target.value)}}/>
+                                           onChange={(e)=>{setSearchValue(1,e.target.value)}}/>
                                     <SearchIcon style={{verticalAlign:"middle"}}/>
                                 </div>
                             </div>
@@ -214,7 +211,7 @@ const Statistics = (props) => {
                                     <input className="myInput"
                                            style={{width:100,fontSize:17,paddingTop:0, background: "#C0DAF5"}}
                                            value={searchValues[2]}
-                                           onChange={(e)=>{setSearchValue(3,e.target.value)}}/>
+                                           onChange={(e)=>{setSearchValue(2,e.target.value)}}/>
                                     <SearchIcon style={{verticalAlign:"middle"}}/>
                                 </div>
                             </div>
