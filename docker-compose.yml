@@ -2,15 +2,14 @@ version: '2'
 
 services:
   mongodb:
-    image: mongo:latest
+    image: mongo:7.0.4
     container_name: 'telegramBot_db'
-    ports:
-      - ${DB_PORTS}
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${DB_ROOT_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${DB_ROOT_PWD}
     volumes:
       - ./mongo/mongo_init.js:/docker-entrypoint-initdb.d/mongo-init.js
+      - mongo_volume:/data/db
 
   server:
     build:
@@ -37,3 +36,6 @@ services:
     depends_on:
       - server
       - mongodb
+
+volumes:
+  mongo_volume:

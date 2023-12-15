@@ -25,13 +25,10 @@ app.add_middleware(
                    "Authorization"]
 )
 
-ATLAS_URI='mongodb://localhost:27017/?retryWrites=true&w=majority'
-DB_NAME='TelegramBotNoSQL'
-
 @app.on_event("startup")
 def startup_db_client():
-    app.mongodb_client = MongoClient(ATLAS_URI)
-    app.database = app.mongodb_client[DB_NAME]
+    app.mongodb_client = MongoClient(os.environ['DB_URL'])
+    app.database = app.mongodb_client[os.environ['DB_NAME']]
 
 
 @app.on_event("shutdown")
