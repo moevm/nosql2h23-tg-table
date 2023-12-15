@@ -67,9 +67,13 @@ def update_student(request: Request, spreadsheet: Spreadsheet):
             column["_id"] = ObjectId(column["_id"])
     update_result = request.app.database["Spreadsheets"].update_one(
         {"_id": ObjectId(spreadsheet["_id"])}, {"$set": {
-            "sheets": spreadsheet["sheets"]
+            "sheets": spreadsheet["sheets"],
+            "link": spreadsheet['link']
         }}
     )
+    # update_result = request.app.database["Spreadsheets"].update_one(
+    #     {"_id": ObjectId(spreadsheet["_id"])}, spreadsheet
+    # )
     if update_result.modified_count == 0:
         return {"status": 400}
     else:

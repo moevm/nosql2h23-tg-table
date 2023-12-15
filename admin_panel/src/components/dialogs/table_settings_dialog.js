@@ -66,6 +66,7 @@ const TableSettingsDialog = (props) => {
             <div>
                 <table>
                     <tbody style={{textAlign:"end"}}>
+                    {props.sheetQuantity>1 ?
                         <tr>
                             <td>
                                 <span style={{marginRight:10}}>Настройки для листа  : </span>
@@ -73,6 +74,7 @@ const TableSettingsDialog = (props) => {
                             <td style={{textAlign:"start"}}>
                                 <select
                                     value={currentSheet}
+                                    style={{fontSize:18}}
                                     onChange={(e)=>{setCurrentSheet(Number(e.target.value))}}
                                 >
                                     {[...Array(props.sheetQuantity).keys()].map((e,ind)=>
@@ -80,7 +82,7 @@ const TableSettingsDialog = (props) => {
                                     )}
                                 </select>
                             </td>
-                        </tr>
+                        </tr> : null}
                         <tr>
                             <td>
                                 <span>Номер последней строки в заголовке</span>
