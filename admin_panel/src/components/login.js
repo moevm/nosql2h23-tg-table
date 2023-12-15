@@ -12,7 +12,6 @@ const Login = (props) => {
         fetch("http://localhost:8000/login/",{
             method: 'GET',
             headers: {
-                "Content-Type": "application/json",
                 "Authorization": email+":"+password
             }
         })
