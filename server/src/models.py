@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from datetime import datetime
 from typing import Annotated, Optional, List
 
@@ -26,6 +24,11 @@ class Student(MongoDbEntity):
 
 class StudentWithRequests(Student):
     requestCount: int = Field()
+
+
+class StatusAndListStudents(BaseModel):
+    students: List[StudentWithRequests] = Field()
+    status: int = Field()
 
 class Column(MongoDbEntity):
     name: str = Field()

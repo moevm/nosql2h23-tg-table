@@ -1,15 +1,48 @@
+from datetime import datetime
+
 from bson import ObjectId
 from fastapi import APIRouter, Request
 from fastapi.encoders import jsonable_encoder
-from typing import List
+from typing import List, Union
 
 from models import RequestItem
 
 router = APIRouter()
 
+pageSize = 2
 
 @router.get('/', response_description="List of all requests", response_model=List[RequestItem])
-def get_spreadsheets(request: Request):
+def get_requests(
+        request: Request,
+        page: int,
+        dateFrom: Union[str,None] = None,
+        dateTo: Union[str, None] = None,
+        groupNumber: Union[str, None] = None,
+        name: Union[str, None] = None,
+        spreadsheet: Union[str,None] = None
+):
+    dateFrom = dateFrom if (dateFrom is not None) else '1970-2-2T00:00:00Z'
+    dateTo = dateTo if (dateTo is not None) else '2999-1-1T:00:00:00Z'
+    groupNumber = groupNumber if (groupNumber is not None) else ""
+    name = name if (name is not None) else ""
+    spreadsheet = spreadsheet if (spreadsheet is not None) else ""
+    query = {
+        "groupNumber": {
+            "$regex": "{groupNumber}".format(groupNumber=groupNumber),
+        },
+        "student.studentName": {
+            "$regex": "{name}".format(name=name),
+            '$options': 'i'
+        },
+        "spreadsheet.spreadsheetName": {
+            "$regex": "{spreadsheet}".format(spreadsheet=spreadsheet),
+            '$options': 'i'
+        },
+        "timestamp": {
+            "$gte": dateFrom,
+            "$lte": dateTo
+        }
+    }
     requests = list(request.app.database["Requests"].aggregate([
         {
             "$lookup": {
@@ -31,6 +64,15 @@ def get_spreadsheets(request: Request):
             "$project": {
                 "tmpField": 0
             }
+        },
+        {
+            "$match": query
+        },
+        {
+            "$skip": page * pageSize
+        },
+        {
+            "$limit": pageSize
         }
     ]))
     return requests
