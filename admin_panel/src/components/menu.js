@@ -21,7 +21,7 @@ const Menu = (props) => {
             .then(data=>{
                 setStudentsData(data)
             })
-        fetch(`http://localhost:8000/requests`,{
+        fetch(`http://localhost:8000/requests/all`,{
             method: 'GET',
             headers: {
                 "Content-Type": "application/json",

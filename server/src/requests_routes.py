@@ -5,13 +5,13 @@ from fastapi import APIRouter, Request
 from fastapi.encoders import jsonable_encoder
 from typing import List, Union
 
-from models import RequestItem
+from models import RequestItemGroupNumber, RequestItem
 
 router = APIRouter()
 
 pageSize = 2
 
-@router.get('/', response_description="List of all requests", response_model=List[RequestItem])
+@router.get('/', response_description="List of all requests", response_model=List[RequestItemGroupNumber])
 def get_requests(
         request: Request,
         page: int,
@@ -77,18 +77,26 @@ def get_requests(
     ]))
     return requests
 
+@router.get(
+    "/all",
+    response_description="List of all requests",
+    response_model=List[RequestItem]
+)
+async def get_all_requests(request:Request):
+    requests = list(request.app.database['Requests'].find())
+    return requests
+
 
 @router.post(
     "/",
     response_description="Operation status"
 )
-def import_requests(request: Request, requests: List[RequestItem]):
+async def import_requests(request: Request, requests: List[RequestItem]):
     requests = jsonable_encoder(requests)
     for req in requests:
         req["_id"] = ObjectId(req["_id"])
         req["student"]["studentId"] = ObjectId(req["student"]["studentId"])
         req["spreadsheet"]["spreadsheetId"] = ObjectId(req["spreadsheet"]["spreadsheetId"])
-        del req["groupNumber"]
     delete_result = request.app.database["Requests"].delete_many({})
     insert_result = request.app.database["Requests"].insert_many(requests)
     print(insert_result.inserted_ids)

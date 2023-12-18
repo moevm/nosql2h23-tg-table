@@ -30,6 +30,7 @@ class StatusAndListStudents(BaseModel):
     students: List[StudentWithRequests] = Field()
     status: int = Field()
 
+
 class Column(MongoDbEntity):
     name: str = Field()
     index: int = Field()
@@ -79,5 +80,7 @@ class RequestItem(MongoDbEntity):
     student: RequestStudent = Field()
     spreadsheet: RequestSpreadsheet = Field()
     timestamp: datetime = Field()
-    groupNumber: str = Field()
 
+
+class RequestItemGroupNumber(RequestItem):
+    groupNumber: str = Field()
