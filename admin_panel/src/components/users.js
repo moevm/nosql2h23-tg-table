@@ -143,27 +143,41 @@ const Users = (props) => {
     const filterParams = ["groupNumber","name","telegramId",'requestCount']
 
     const filterUsers = ()=>{
-        let newUsers = [...currentUsers]
+        const urlParams = new URLSearchParams({})
         for (let i=0;i<4;i++){
             if (searchValues[i].length>0){
-                const searchValue = searchValues[i]
-                const currentFilter = filterParams[i]
-                if (i===3){
-                    newUsers= newUsers.filter(e=>{
-                        return  _.get(e,`${currentFilter}`)===Number(searchValue)
-                    })
-                } else {
-                    newUsers= newUsers.filter(e=>{
-                        return  _.get(e,`${currentFilter}`).toString().toLowerCase().includes(searchValue.toLowerCase())
-                    })
-                }
+                urlParams.append(filterParams[i],searchValues[i])
             }
         }
-        setCurrentUsers(newUsers)
+        console.log(searchValues)
+        console.log(urlParams)
+         fetch("http://localhost:8000/students/?" + urlParams,{
+                    method: 'GET',
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                })
+                    .then(res=>res.json())
+                    .then(data=>{
+                        console.log(data)
+                        setUsers(data)
+                        setCurrentUsers(data)
+                    })
     }
 
     const clearFilterValues = ()=>{
-        setCurrentUsers(users)
+        fetch("http://localhost:8000/students/?",{
+                            method: 'GET',
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                        })
+                            .then(res=>res.json())
+                            .then(data=>{
+                                console.log(data)
+                                setUsers(data)
+                                setCurrentUsers(data)
+                            })
         setSearchValues(['','','',''])
     }
     return (

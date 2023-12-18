@@ -1,21 +1,68 @@
 from bson import ObjectId
 from fastapi import APIRouter, Body, Request, Response, HTTPException, status
 from fastapi.encoders import jsonable_encoder
-from typing import List
+from typing import List, Optional, Union
 
 from models import Student, StudentWithRequests
 
 router = APIRouter()
 
 
+# @router.get('/', response_description="List of all students", response_model=List[StudentWithRequests])
+# async def get_students_requests(request: Request):
+#     students = list(request.app.database["Students"].find())
+#     for student in students:
+#         request_count = len(list(request.app.database["Requests"].find({
+#             "student.studentId": ObjectId(student["_id"])
+#         })))
+#         student["requestCount"] = request_count
+#     return students
+
+
 @router.get('/', response_description="List of all students", response_model=List[StudentWithRequests])
-async def get_students_requests(request: Request):
-    students = list(request.app.database["Students"].find())
-    for student in students:
-        request_count = len(list(request.app.database["Requests"].find({
-            "student.studentId": ObjectId(student["_id"])
-        })))
-        student["requestCount"] = request_count
+async def get_students_requests_params(
+        request: Request,
+        groupNumber: Union[str, None] = None,
+        name: Union[str, None] = None,
+        telegramId: Union[str, None] = None,
+        requestCount: Union[int, None] = None):
+    telegramId = telegramId if (telegramId is not None) else ""
+    groupNumber = groupNumber if (groupNumber is not None) else ""
+    name = name if (name is not None) else ""
+    requestCount = requestCount if (requestCount is not None) else -1
+    query = {
+        "groupNumber": {
+            "$regex": "{group}".format(group=groupNumber)
+        },
+        "name": {
+            "$regex": "{name}".format(name=name)
+        },
+        "telegramId": {
+            "$regex": "{telegram_id}".format(telegram_id=telegramId)
+        },
+        "requestCount": ({"$gt": requestCount} if (requestCount==-1) else requestCount)
+    }
+    students = list(request.app.database["Students"].aggregate([
+        {
+            "$lookup": {
+                "from": "Requests",
+                "localField": "_id",
+                "foreignField": "student.studentId",
+                "as": "tmpField"
+            }
+        },
+        {
+            "$addFields": {
+                "requestCount": {"$size": "$tmpField"}
+            }
+        },
+        {
+            "$unwind": "$requestCount"
+        },
+        {
+            "$match": query
+        }
+    ]))
     return students
 
 
