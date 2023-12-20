@@ -10,9 +10,23 @@ const Statistics = (props) => {
         props.setTitle("Статистика")
     })
 
+    const pageSize = 2
+
     useEffect(()=>{
         let urlParams = new URLSearchParams({})
         urlParams.append('page',currentPage)
+        fetch(`http://localhost:8000/requests/count/?`+urlParams,{
+            method: 'GET',
+            headers: {
+                "Content-Type": "application/json",
+            },
+        })
+            .then(res=>res.json())
+            .then(data=>{
+                if (data.length>0){
+                    setTotalReqs(data[0].total)
+                }
+            })
         fetch(`http://localhost:8000/requests/?`+urlParams,{
             method: 'GET',
             headers: {
@@ -43,6 +57,7 @@ const Statistics = (props) => {
     const [dateTo,setDateTo] = useState('')
 
     const [currentPage,setCurrentPage] = useState(0)
+    const [totalReqs, setTotalReqs] = useState(0)
 
     const setSearchValue = (index,value)=>{
         const newSearchValues = searchValues.map((elem,ind)=>{
@@ -59,6 +74,18 @@ const Statistics = (props) => {
         let urlParams = new URLSearchParams({})
         setCurrentPage(0)
         urlParams.append('page',0)
+        fetch(`http://localhost:8000/requests/count/?`+urlParams,{
+            method: 'GET',
+            headers: {
+                "Content-Type": "application/json",
+            },
+        })
+            .then(res=>res.json())
+            .then(data=>{
+                if (data.length>0){
+                    setTotalReqs(data[0].total)
+                }
+            })
         fetch(`http://localhost:8000/requests/?`+urlParams,{
             method: 'GET',
             headers: {
@@ -90,7 +117,19 @@ const Statistics = (props) => {
             let to = new Date(dateTo)
             urlParams.append('dateTo',to.toISOString())
         }
-        urlParams.append('page',currentPage)
+        urlParams.append('page',0)
+        fetch(`http://localhost:8000/requests/count/?`+urlParams,{
+            method: 'GET',
+            headers: {
+                "Content-Type": "application/json",
+            },
+        })
+            .then(res=>res.json())
+            .then(data=>{
+                if (data.length>0){
+                    setTotalReqs(data[0].total)
+                }
+            })
         fetch(`http://localhost:8000/requests/?`+urlParams,{
             method: 'GET',
             headers: {
@@ -146,7 +185,7 @@ const Statistics = (props) => {
                 setVisible={setIsPlotVisible}
                 requests={requests}
             />
-            <div style={{textAlign:'end',marginRight:20}}>
+            {requests.length===0 ? null :  <div style={{textAlign:'end',marginRight:20}}>
                 {currentPage>0 ? <KeyboardArrowLeftIcon
                     style={{background: "#62A3E7",
                         border: '2px solid rgba(40, 96, 173, 1)',
@@ -157,7 +196,7 @@ const Statistics = (props) => {
                     onClick={()=>{updatePage(-1)}}
                 ></KeyboardArrowLeftIcon> : null}
                 <span style={{color: "#1A4297", fontSize: 20, paddingLeft: 5, paddingRight: 5, fontWeight:'bold'}}>{currentPage+1}</span>
-                <KeyboardArrowRightIcon
+                {(currentPage+1)*pageSize >= totalReqs ? null :  <KeyboardArrowRightIcon
                     style={{background: "#62A3E7",
                         border: '2px solid rgba(40, 96, 173, 1)',
                         borderRadius: 5,
@@ -165,9 +204,8 @@ const Statistics = (props) => {
                         verticalAlign:"middle", cursor:'pointer'}}
                     onClick={()=>{updatePage(1)}}
                 >
-
-                </KeyboardArrowRightIcon>
-            </div>
+                </KeyboardArrowRightIcon>}
+            </div>}
             <div style={{overflow: "auto",maxHeight:300,marginTop:10}}>
                 {requests.length>0 ? <table className="MyTable" style={{minWidth:700}}>
                     <thead>

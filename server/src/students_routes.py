@@ -7,18 +7,59 @@ from models import Student, StudentWithRequests, StatusAndListStudents
 
 router = APIRouter()
 
-
-# @router.get('/', response_description="List of all students", response_model=List[StudentWithRequests])
-# async def get_students_requests(request: Request):
-#     students = list(request.app.database["Students"].find())
-#     for student in students:
-#         request_count = len(list(request.app.database["Requests"].find({
-#             "student.studentId": ObjectId(student["_id"])
-#         })))
-#         student["requestCount"] = request_count
-#     return students
-
 pageSize = 2
+
+@router.get('/count', response_description="List of all students")
+async def get_students_params_count(
+        request: Request,
+        groupNumber: Union[str, None] = None,
+        name: Union[str, None] = None,
+        telegramId: Union[str, None] = None,
+        requestCount: Union[int, None] = None,
+):
+    telegramId = telegramId if (telegramId is not None) else ""
+    groupNumber = groupNumber if (groupNumber is not None) else ""
+    name = name if (name is not None) else ""
+    requestCount = requestCount if (requestCount is not None) else -1
+    query = {
+        "groupNumber": {
+            "$regex": "{group}".format(group=groupNumber),
+        },
+        "name": {
+            "$regex": "{name}".format(name=name),
+            '$options': 'i'
+        },
+        "telegramId": {
+            "$regex": "{telegram_id}".format(telegram_id=telegramId),
+            '$options': 'i'
+        },
+        "requestCount": ({"$gt": requestCount} if (requestCount==-1) else requestCount)
+    }
+    count = list(request.app.database["Students"].aggregate([
+        {
+            "$lookup": {
+                "from": "Requests",
+                "localField": "_id",
+                "foreignField": "student.studentId",
+                "as": "tmpField"
+            }
+        },
+        {
+            "$addFields": {
+                "requestCount": {"$size": "$tmpField"}
+            }
+        },
+        {
+            "$unwind": "$requestCount"
+        },
+        {
+            "$match": query
+        },
+        {
+            "$count": "total"
+        }
+    ]))
+    return count
 
 @router.get('/', response_description="List of all students", response_model=List[StudentWithRequests])
 async def get_students_requests_params(

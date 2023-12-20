@@ -8,6 +8,9 @@ import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 
 const Users = (props) => {
+
+    const pageSize = 2
+
     useEffect(()=>{
         props.setTitle("Пользователи")
     })
@@ -52,6 +55,18 @@ const Users = (props) => {
             .then(data=>{
                 if (data.status===201){
                     setUsers(data.students)
+                    fetch("http://localhost:8000/students/count/?",{
+                        method: 'GET',
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                    })
+                        .then(res=>res.json())
+                        .then(data=>{
+                            if (data.length>0) {
+                                setTotalUsers(data[0].total)
+                            }
+                        })
                     setCurrentPage(0)
                     setSearchValues(['','','',''])
                 } else {
@@ -97,6 +112,18 @@ const Users = (props) => {
             .then((data)=>{
                 if (data.status===200){
                     setUsers(data.students)
+                    fetch("http://localhost:8000/students/count/?",{
+                        method: 'GET',
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                    })
+                        .then(res=>res.json())
+                        .then(data=>{
+                            if (data.length>0) {
+                                setTotalUsers(data[0].total)
+                            }
+                        })
                     setCurrentPage(0)
                     setSearchValues(['','','',''])
                 } else {
@@ -120,22 +147,45 @@ const Users = (props) => {
         }
         setCurrentPage(0)
         urlParams.append('page',0)
-         fetch("http://localhost:8000/students/?" + urlParams,{
-                    method: 'GET',
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                })
-                    .then(res=>res.json())
-                    .then(data=>{
-                        console.log(data)
-                        setUsers(data)
-                    })
+        fetch("http://localhost:8000/students/count/?" + urlParams,{
+            method: 'GET',
+            headers: {
+                "Content-Type": "application/json",
+            },
+        })
+            .then(res=>res.json())
+            .then(data=>{
+                if (data.length>0) {
+                    setTotalUsers(data[0].total)
+                }
+            })
+        fetch("http://localhost:8000/students/?" + urlParams,{
+            method: 'GET',
+            headers: {
+                "Content-Type": "application/json",
+            },
+        })
+            .then(res=>res.json())
+            .then(data=>{
+                setUsers(data)
+            })
     }
 
     const clearFilterValues = ()=>{
         const urlParams = new URLSearchParams({})
         urlParams.append('page',0)
+        fetch("http://localhost:8000/students/count/?" + urlParams,{
+            method: 'GET',
+            headers: {
+                "Content-Type": "application/json",
+            },
+        })
+            .then(res=>res.json())
+            .then(data=>{
+                if (data.length>0) {
+                    setTotalUsers(data[0].total)
+                }
+            })
         fetch("http://localhost:8000/students/?"+urlParams,{
                             method: 'GET',
                             headers: {
@@ -151,11 +201,24 @@ const Users = (props) => {
     }
 
     const [currentPage,setCurrentPage] = useState(0)
+    const [totalUsers,setTotalUsers] = useState(0)
 
 
     useEffect(()=>{
         const urlParams = new URLSearchParams({})
         urlParams.append("page",currentPage)
+        fetch("http://localhost:8000/students/count/?" + urlParams,{
+            method: 'GET',
+            headers: {
+                "Content-Type": "application/json",
+            },
+        })
+            .then(res=>res.json())
+            .then(data=>{
+                if (data.length>0) {
+                    setTotalUsers(data[0].total)
+                }
+            })
         fetch("http://localhost:8000/students/?" + urlParams,{
             method: 'GET',
             headers: {
@@ -199,28 +262,27 @@ const Users = (props) => {
                 deleteUserFun={deleteUser}
                 user={currentEditUser}
             />
-            <div style={{textAlign:'end',marginRight:20}}>
+            {users.length===0 ? null : <div style={{textAlign:'end',marginRight:20}}>
                 {currentPage>0 ? <KeyboardArrowLeftIcon
-                        style={{background: "#62A3E7",
-                            border: '2px solid rgba(40, 96, 173, 1)',
-                            borderRadius: 5,
-                            color: "white",
-                            verticalAlign:"middle",
-                            cursor:'pointer'}}
-                        onClick={()=>{updatePage(-1)}}
-                    ></KeyboardArrowLeftIcon> : null}
-                <span style={{color: "#1A4297", fontSize: 20, paddingLeft: 5, paddingRight: 5, fontWeight:'bold'}}>{currentPage+1}</span>
-                <KeyboardArrowRightIcon
                     style={{background: "#62A3E7",
-                    border: '2px solid rgba(40, 96, 173, 1)',
-                    borderRadius: 5,
-                    color: "white",
-                    verticalAlign:"middle", cursor:'pointer'}}
+                        border: '2px solid rgba(40, 96, 173, 1)',
+                        borderRadius: 5,
+                        color: "white",
+                        verticalAlign:"middle",
+                        cursor:'pointer'}}
+                    onClick={()=>{updatePage(-1)}}
+                ></KeyboardArrowLeftIcon> : null}
+                <span style={{color: "#1A4297", fontSize: 20, paddingLeft: 5, paddingRight: 5, fontWeight:'bold'}}>{currentPage+1}</span>
+                {(currentPage+1)*pageSize >= totalUsers ? null : <KeyboardArrowRightIcon
+                    style={{background: "#62A3E7",
+                        border: '2px solid rgba(40, 96, 173, 1)',
+                        borderRadius: 5,
+                        color: "white",
+                        verticalAlign:"middle", cursor:'pointer'}}
                     onClick={()=>{updatePage(1)}}
                 >
-
-                </KeyboardArrowRightIcon>
-            </div>
+                </KeyboardArrowRightIcon>}
+            </div>}
             <div style={{overflow: "auto",maxHeight:300, marginTop:10}}>
                 {users.length>0 ? <table className="MyTable" style={{minWidth:700}}>
                     <thead>
