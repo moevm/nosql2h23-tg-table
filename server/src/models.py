@@ -46,6 +46,10 @@ class Sheet(MongoDbEntity):
     endColumn: int = Field()
     columns: List[Column]
 
+class SheetStatus(BaseModel):
+    sheet: Sheet = Field()
+    status: int = Field()
+
 
 class SpreadsheetShort(MongoDbEntity):
     name: str = Field()
@@ -54,6 +58,10 @@ class SpreadsheetShort(MongoDbEntity):
 class Spreadsheet(SpreadsheetShort):
     sheets: List[Sheet]
     link: str = Field()
+
+class SpreadsheetStatus(BaseModel):
+    spreadsheet: Spreadsheet = Field()
+    status: int = Field()
 
 
 class RequestStudent(BaseModel):

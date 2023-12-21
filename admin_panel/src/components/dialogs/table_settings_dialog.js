@@ -53,8 +53,17 @@ const TableSettingsDialog = (props) => {
                 return
             }
         }
+
         props.setTableSettings(sheetsSettings)
         props.setVisible(false)
+        setSheetsSettings([...Array(props.sheetQuantity).keys()].map(e=>{
+            return {
+                lastHeadRow : 0,
+                columnNamesRow: 0,
+                lastColumn: "",
+                lastRow: 0
+            }
+        }))
         // TODO(Регульрка для проверки названия последне колонки)
     }
 
@@ -198,7 +207,17 @@ const TableSettingsDialog = (props) => {
                 <button
                     className='defaultButton'
                     style={{marginLeft:"auto"}}
-                    onClick={()=>{props.setVisible(false)}}
+                    onClick={()=>{
+                        props.setVisible(false)
+                        setSheetsSettings([...Array(props.sheetQuantity).keys()].map(e=>{
+                            return {
+                                lastHeadRow : 0,
+                                columnNamesRow: 0,
+                                lastColumn: "",
+                                lastRow: 0
+                            }
+                        }))
+                    }}
                 >
                     Отмена
                 </button>

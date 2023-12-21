@@ -1,13 +1,14 @@
+import os
+
 import uvicorn
 from fastapi import FastAPI
 from pymongo import MongoClient
 from starlette.middleware.cors import CORSMiddleware
-import os
 
-from students_routes import router as students_router
 from login_routes import router as login_router
-from spreadsheets_routes import router as spreadsheets_router
 from requests_routes import router as requests_router
+from spreadsheets_routes import router as spreadsheets_router
+from students_routes import router as students_router
 
 app = FastAPI()
 
@@ -26,7 +27,6 @@ app.add_middleware(
     allow_headers=["Content-Type", "Set-Cookie", "Access-Control-Allow-Headers", "Access-Control-Allow-Origin",
                    "Authorization"]
 )
-
 @app.on_event("startup")
 def startup_db_client():
     app.mongodb_client = MongoClient(os.environ['DB_URL'])

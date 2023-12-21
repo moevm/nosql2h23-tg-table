@@ -8,6 +8,7 @@ import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import TableSettingsDialog from "./dialogs/table_settings_dialog";
+import LinkChangeDialog from "./dialogs/link_change_dialog";
 
 const ConcreteTable = (props) => {
     let {id} = useParams()
@@ -42,23 +43,27 @@ const ConcreteTable = (props) => {
     }
 
     const saveTable = () => {
-        console.log(spreadsheet)
         if (check()){
-            fetch(`http://localhost:8000/spreadsheets/${id}`,{
-                method: 'PUT',
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(spreadsheet)
-            })
-                .then(res=>res.json())
-                .then((data)=>{
-                    if (data.status===200){
-
-                    } else {
-                        alert("Не удалось отредактировать данные")
-                    }
+            if (linkValue!==spreadsheet.link){
+                setIsSettingsVisible(true)
+            } else {
+                fetch(`http://localhost:8000/spreadsheets/${id}`,{
+                    method: 'PUT',
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(spreadsheet)
                 })
+                    .then(res=>res.json())
+                    .then((data)=>{
+                        if (data.status===200){
+                            setSpreadSheet(data.spreadsheet)
+                            setCurrentSheetId(0)
+                        } else {
+                            alert("Не удалось отредактировать данные")
+                        }
+                    })
+            }
         } else {
             alert('Введены некорректные данные')
         }
@@ -100,7 +105,7 @@ const ConcreteTable = (props) => {
     }
 
     const saveHeaderRow = ()=>{
-        if (headerRow<=spreadsheet.sheets[currentSheetId].headerRow){
+        if (headerRow<=spreadsheet.sheets[currentSheetId].startRow-1){
             const copy = JSON.parse(JSON.stringify(spreadsheet))
             copy.sheets[currentSheetId].headerRow = headerRow
             setSpreadSheet(copy)
@@ -120,14 +125,68 @@ const ConcreteTable = (props) => {
                 columns: []
             }
         })
-        const copy = JSON.parse(JSON.stringify(spreadsheet))
-        copy.sheets.push(sheets[0])
-        setSpreadSheet(copy)
+        fetch(`http://localhost:8000/spreadsheets/${id}/add_sheet`,{
+            method: 'PUT',
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(sheets[0])
+        })
+            .then(res=>res.json())
+            .then((data)=>{
+                if (data.status===200){
+                    const copy = JSON.parse(JSON.stringify(spreadsheet))
+                    copy.sheets.push(data.sheet)
+                    setSpreadSheet(copy)
+                } else {
+                    alert("Не удалось отредактировать данные")
+                }
+            })
     }
 
     const [currentSheetId,setCurrentSheetId] = useState(0)
+    const [isSettingsVisible, setIsSettingsVisible] = useState(false)
+
+    const addNewSheets = (settings)=>{
+        const sheets = settings.map(e=>{
+            return {
+                startRow: e.lastHeadRow+1,
+                endRow: e.lastRow,
+                headerRow: e.columnNamesRow,
+                startColumn: 1,
+                endColumn: convertColumnToNumber(e.lastColumn.toUpperCase()),
+                columns: []
+            }
+        })
+        const copy = JSON.parse(JSON.stringify(spreadsheet))
+        copy.sheets = sheets
+        copy.link = linkValue
+        fetch(`http://localhost:8000/spreadsheets/${id}`,{
+            method: 'PUT',
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(copy)
+        })
+            .then(res=>res.json())
+            .then((data)=>{
+                if (data.status===200){
+                    setSpreadSheet(data.spreadsheet)
+                    setCurrentSheetId(0)
+                } else {
+                    alert("Не удалось отредактировать данные")
+                }
+            })
+
+    }
     return (
         <div>
+            <LinkChangeDialog
+                visible={isSettingsVisible}
+                setVisible={setIsSettingsVisible}
+                setSettings={addNewSheets}
+            >
+            </LinkChangeDialog>
             <TableSettingsDialog
                 visible={isSettingsDialogVisible}
                 setVisible={setIsSettingsDialogVisible}
@@ -147,9 +206,6 @@ const ConcreteTable = (props) => {
                                         value={linkValue}
                                         onChange={(e)=>{
                                             setLinkValue(e.target.value)
-                                            const copy = JSON.parse(JSON.stringify(spreadsheet))
-                                            copy.link = e.target.value
-                                            setSpreadSheet(copy)
                                         }}
                                     />
                                     <PublicIcon
@@ -162,7 +218,7 @@ const ConcreteTable = (props) => {
                             <td style={{display:'flex',flexDirection:'row', alignItems:'center', marginTop:5}}>
                                 <div className="TableInfo" style={{background: "#62A3E7", width: "fit-content", minWidth: 0,marginRight:0}}>
                                     <span>Лист:</span>
-                                    <select style={{marginLeft: 12}} onChange={(e)=>{onChangeItem(e.target.value)}}>
+                                    <select style={{marginLeft: 12}} value={currentSheetId} onChange={(e)=>{onChangeItem(e.target.value)}}>
                                         {[ ...Array(spreadsheet.sheets.length).keys() ].map(i => <option key={i} value = {i}>{i+1}</option>)}
                                     </select>
                                 </div>
@@ -212,11 +268,11 @@ const ConcreteTable = (props) => {
                                 return <tr key={column._id}>
                                     <td>
                                         {column.isTelegramId ?
-                                            <div className="TableInfo" style={{background: "white", color: "#153A8A"}}>
-                                                <ContactPageIcon/>
+                                            <div className="TableInfo" style={{background: "white", color: "#153A8A", maxWidth:340}}>
+                                                <ContactPageIcon style={{marginRight:5}}/>
                                                 <span>{column.name} </span>
                                             </div> :
-                                            <div className="TableInfo" style={{background: "white", color: "#153A8A"}}>
+                                            <div className="TableInfo" style={{background: "white", color: "#153A8A", maxWidth:340}}>
                                                 <span>{column.name} </span>
                                             </div>
                                         }

@@ -3,7 +3,8 @@ from fastapi import APIRouter, Body, Request, Response, HTTPException
 from fastapi.encoders import jsonable_encoder
 from typing import List
 
-from models import Spreadsheet, SpreadsheetShort
+from models import Spreadsheet, SpreadsheetShort, SpreadsheetStatus, Sheet, SheetStatus
+from sheets_service import fill_spreadsheet_info, fill_added_sheets, fill_one_added_sheet
 
 router = APIRouter()
 
@@ -19,6 +20,7 @@ def get_spreadsheets(request: Request):
 @router.post('/')
 def add_spreadsheet(request: Request, spreadsheet: Spreadsheet):
     spreadsheet = jsonable_encoder(spreadsheet)
+    fill_spreadsheet_info(spreadsheet)
     spreadsheet["_id"] = ObjectId()
     for sheet in spreadsheet["sheets"]:
         sheet["_id"] = ObjectId()
@@ -54,28 +56,62 @@ def get_spreadsheet(_id: str, request: Request):
     )
     return spreadsheet
 
+
 @router.put(
     "/{_id}",
-    response_description="Operation Status"
+    response_description="Operation Status",
+    response_model=SpreadsheetStatus
 )
-def update_student(request: Request, spreadsheet: Spreadsheet):
+def update_spreadsheet(request: Request, spreadsheet: Spreadsheet):
     spreadsheet = jsonable_encoder(spreadsheet)
     spreadsheet["_id"] = ObjectId(spreadsheet["_id"])
     for sheet in spreadsheet["sheets"]:
         sheet["_id"] = ObjectId(sheet["_id"])
         for column in sheet['columns']:
             column["_id"] = ObjectId(column["_id"])
+    old_spreadsheet = request.app.database['Spreadsheets'].find_one(
+        {"_id": spreadsheet["_id"]}
+    )
+    flag = False
+    for old_sheet, new_sheet in zip(old_spreadsheet["sheets"], spreadsheet["sheets"]):
+        if old_sheet['headerRow'] != new_sheet['headerRow']:
+            new_sheet['columns'] = []
+            flag = True
+    if (old_spreadsheet['link'] != spreadsheet['link']):
+        flag = True
+    if flag:
+        fill_added_sheets(spreadsheet)
     update_result = request.app.database["Spreadsheets"].update_one(
         {"_id": ObjectId(spreadsheet["_id"])}, {"$set": {
             "sheets": spreadsheet["sheets"],
             "link": spreadsheet['link']
         }}
     )
-    # update_result = request.app.database["Spreadsheets"].update_one(
-    #     {"_id": ObjectId(spreadsheet["_id"])}, spreadsheet
-    # )
     if update_result.modified_count == 0:
-        return {"status": 400}
+        return {"status": 400, "spreadsheet": None}
     else:
-        return {"status": 200}
+        return {"status": 200, "spreadsheet": spreadsheet}
 
+
+@router.put(
+    "/{_id}/add_sheet",
+    response_description="Operation Status",
+    response_model=SheetStatus
+)
+def add_sheet(_id: str, request: Request, sheet: Sheet):
+    sheet = jsonable_encoder(sheet)
+    spreadsheet = request.app.database['Spreadsheets'].find_one(
+        {"_id": ObjectId(_id)}
+    )
+    sheet["_id"] = ObjectId()
+    spreadsheet["sheets"].append(sheet)
+    fill_one_added_sheet(spreadsheet)
+    update_result = request.app.database["Spreadsheets"].update_one(
+        {"_id": ObjectId(spreadsheet["_id"])}, {"$set": {
+            "sheets": spreadsheet["sheets"],
+        }}
+    )
+    if update_result.modified_count == 0:
+        return {"status": 400, "sheet": None}
+    else:
+        return {"status": 200, "sheet": spreadsheet["sheets"][-1]}
