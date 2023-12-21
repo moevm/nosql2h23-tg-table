@@ -3,42 +3,88 @@ from fastapi import APIRouter, Body, Request, Response, HTTPException, status
 from fastapi.encoders import jsonable_encoder
 from typing import List, Optional, Union
 
-from models import Student, StudentWithRequests
+from models import Student, StudentWithRequests, StatusAndListStudents
 
 router = APIRouter()
 
+pageSize = 2
 
-# @router.get('/', response_description="List of all students", response_model=List[StudentWithRequests])
-# async def get_students_requests(request: Request):
-#     students = list(request.app.database["Students"].find())
-#     for student in students:
-#         request_count = len(list(request.app.database["Requests"].find({
-#             "student.studentId": ObjectId(student["_id"])
-#         })))
-#         student["requestCount"] = request_count
-#     return students
-
-
-@router.get('/', response_description="List of all students", response_model=List[StudentWithRequests])
-async def get_students_requests_params(
+@router.get('/count', response_description="List of all students")
+async def get_students_params_count(
         request: Request,
         groupNumber: Union[str, None] = None,
         name: Union[str, None] = None,
         telegramId: Union[str, None] = None,
-        requestCount: Union[int, None] = None):
+        requestCount: Union[int, None] = None,
+):
     telegramId = telegramId if (telegramId is not None) else ""
     groupNumber = groupNumber if (groupNumber is not None) else ""
     name = name if (name is not None) else ""
     requestCount = requestCount if (requestCount is not None) else -1
     query = {
         "groupNumber": {
-            "$regex": "{group}".format(group=groupNumber)
+            "$regex": "{group}".format(group=groupNumber),
         },
         "name": {
-            "$regex": "{name}".format(name=name)
+            "$regex": "{name}".format(name=name),
+            '$options': 'i'
         },
         "telegramId": {
-            "$regex": "{telegram_id}".format(telegram_id=telegramId)
+            "$regex": "{telegram_id}".format(telegram_id=telegramId),
+            '$options': 'i'
+        },
+        "requestCount": ({"$gt": requestCount} if (requestCount==-1) else requestCount)
+    }
+    count = list(request.app.database["Students"].aggregate([
+        {
+            "$lookup": {
+                "from": "Requests",
+                "localField": "_id",
+                "foreignField": "student.studentId",
+                "as": "tmpField"
+            }
+        },
+        {
+            "$addFields": {
+                "requestCount": {"$size": "$tmpField"}
+            }
+        },
+        {
+            "$unwind": "$requestCount"
+        },
+        {
+            "$match": query
+        },
+        {
+            "$count": "total"
+        }
+    ]))
+    return count
+
+@router.get('/', response_description="List of all students", response_model=List[StudentWithRequests])
+async def get_students_requests_params(
+        request: Request,
+        page: int,
+        groupNumber: Union[str, None] = None,
+        name: Union[str, None] = None,
+        telegramId: Union[str, None] = None,
+        requestCount: Union[int, None] = None,
+):
+    telegramId = telegramId if (telegramId is not None) else ""
+    groupNumber = groupNumber if (groupNumber is not None) else ""
+    name = name if (name is not None) else ""
+    requestCount = requestCount if (requestCount is not None) else -1
+    query = {
+        "groupNumber": {
+            "$regex": "{group}".format(group=groupNumber),
+        },
+        "name": {
+            "$regex": "{name}".format(name=name),
+            '$options': 'i'
+        },
+        "telegramId": {
+            "$regex": "{telegram_id}".format(telegram_id=telegramId),
+            '$options': 'i'
         },
         "requestCount": ({"$gt": requestCount} if (requestCount==-1) else requestCount)
     }
@@ -61,6 +107,12 @@ async def get_students_requests_params(
         },
         {
             "$match": query
+        },
+        {
+            "$skip": page*pageSize
+        },
+        {
+            "$limit": pageSize
         }
     ]))
     return students
@@ -75,18 +127,39 @@ async def get_students(request: Request):
 @router.post(
     "/add_student",
     response_description="Operation status + inserted _id",
+    response_model=StatusAndListStudents
 )
 def create_student(request: Request, student: Student):
     student = jsonable_encoder(student)
     student["_id"] = ObjectId()
-    new_user = request.app.database["Students"].insert_one(student)
-    created_user = request.app.database["Students"].find_one(
-        {"_id": new_user.inserted_id}
-    )
-    if created_user is not None:
-        return {"status": 201, "_id": str(created_user.get("_id"))}
+    insert_result = request.app.database["Students"].insert_one(student)
+    if insert_result.inserted_id is not None:
+        students = list(request.app.database["Students"].aggregate([
+            {
+                "$lookup": {
+                    "from": "Requests",
+                    "localField": "_id",
+                    "foreignField": "student.studentId",
+                    "as": "tmpField"
+                }
+            },
+            {
+                "$addFields": {
+                    "requestCount": {"$size": "$tmpField"}
+                }
+            },
+            {
+                "$unwind": "$requestCount"
+            },
+            {
+                "$skip": 0 * pageSize
+            },
+            {
+                "$limit": pageSize
+            }]))
+        return {"status": 201, "students": students}
     else:
-        return {"status": 400}
+        return {"status": 400, "students": []}
 
 
 @router.put(
@@ -110,7 +183,8 @@ def update_student(request: Request, student: Student):
 
 @router.delete(
     "/delete_student",
-    response_description="Operations status"
+    response_description="Operations status",
+    response_model=StatusAndListStudents
 )
 def delete_student(request: Request, student: Student):
     student = jsonable_encoder(student)
@@ -118,9 +192,32 @@ def delete_student(request: Request, student: Student):
         {"_id": ObjectId(student["_id"])}
     )
     if delete_result.deleted_count == 0:
-        return {"status": 400}
+        return {"status": 400, "students": []}
     else:
-        return {"status": 200}
+        students = list(request.app.database["Students"].aggregate([
+            {
+                "$lookup": {
+                    "from": "Requests",
+                    "localField": "_id",
+                    "foreignField": "student.studentId",
+                    "as": "tmpField"
+                }
+            },
+            {
+                "$addFields": {
+                    "requestCount": {"$size": "$tmpField"}
+                }
+            },
+            {
+                "$unwind": "$requestCount"
+            },
+            {
+                "$skip": 0 * pageSize
+            },
+            {
+                "$limit": pageSize
+            }]))
+        return {"status": 200, "students": students}
 
 
 @router.post(
@@ -133,8 +230,6 @@ def import_students(request: Request, students: List[Student]):
     for student in students:
         student["_id"] = ObjectId(student["_id"])
     insert_result = request.app.database["Students"].insert_many(students)
-    print(insert_result.inserted_ids)
-
     if len(insert_result.inserted_ids) == len(students):
         return {"status": 200}
     else:

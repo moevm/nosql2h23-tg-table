@@ -15,7 +15,7 @@ const ImportDialog = (props) => {
     }
 
     const studentsProperties=['_id','groupNumber','name','telegramId']
-    const requestsProperties = ["_id","timestamp","groupNumber","student","spreadsheet"]
+    const requestsProperties = ["_id","timestamp","student","spreadsheet"]
 
     const applyImport = ()=>{
         if (file){

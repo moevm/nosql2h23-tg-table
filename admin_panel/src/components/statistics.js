@@ -2,15 +2,32 @@ import React, {useEffect, useState} from 'react';
 import AutoGraphIcon from '@mui/icons-material/AutoGraph';
 import SearchIcon from '@mui/icons-material/Search';
 import PlotDialog from "./dialogs/plot_dialog";
-import _ from "lodash";
+import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
+import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 
 const Statistics = (props) => {
     useEffect(()=>{
         props.setTitle("Статистика")
     })
 
+    const pageSize = 2
+
     useEffect(()=>{
-        fetch(`http://localhost:8000/requests`,{
+        let urlParams = new URLSearchParams({})
+        urlParams.append('page',currentPage)
+        fetch(`http://localhost:8000/requests/count/?`+urlParams,{
+            method: 'GET',
+            headers: {
+                "Content-Type": "application/json",
+            },
+        })
+            .then(res=>res.json())
+            .then(data=>{
+                if (data.length>0){
+                    setTotalReqs(data[0].total)
+                }
+            })
+        fetch(`http://localhost:8000/requests/?`+urlParams,{
             method: 'GET',
             headers: {
                 "Content-Type": "application/json",
@@ -22,7 +39,6 @@ const Statistics = (props) => {
                     return {...e,timestamp:new Date(e.timestamp)}
                 })
                 setRequests(requestsWithCorrectTime)
-                setCurrentRequests(requestsWithCorrectTime)
             })
     },[])
 
@@ -30,16 +46,18 @@ const Statistics = (props) => {
         window.location.href='/menu';
     }
 
-    const filterParams = ["groupNumber","student.studentName","spreadsheet.spreadsheetName"]
+    const filterParams = ["groupNumber","name","spreadsheet"]
 
     const [requests,setRequests] = useState([])
-    const [currentRequests, setCurrentRequests] = useState([])
     const [isPlotVisible, setIsPlotVisible] = useState(false)
     const [searchValues,setSearchValues] = useState([
         '','',''
     ])
     const [dateFrom,setDateFrom] = useState('')
     const [dateTo,setDateTo] = useState('')
+
+    const [currentPage,setCurrentPage] = useState(0)
+    const [totalReqs, setTotalReqs] = useState(0)
 
     const setSearchValue = (index,value)=>{
         const newSearchValues = searchValues.map((elem,ind)=>{
@@ -52,90 +70,144 @@ const Statistics = (props) => {
         setSearchValues(newSearchValues)
     }
 
-    // const filterRequests = (currentFilter, searchValue)=>{
-    //     if (searchValue.length>0){
-    //         let newRequests = [...requests].filter(e=>{
-    //             // e[currentFilter].toString().
-    //             if (currentFilter==='timestamp'){
-    //                 return `${_.get(e,`${currentFilter}`).toLocaleDateString()} ${_.get(e,`${currentFilter}`).toLocaleTimeString()}`.includes(searchValue)
-    //             }
-    //             return  _.get(e,`${currentFilter}`).toString().includes(searchValue)
-    //         })
-    //         setCurrentRequests(newRequests)
-    //     }
-    // }
+    const clearFilterValues = ()=>{
+        let urlParams = new URLSearchParams({})
+        setCurrentPage(0)
+        urlParams.append('page',0)
+        fetch(`http://localhost:8000/requests/count/?`+urlParams,{
+            method: 'GET',
+            headers: {
+                "Content-Type": "application/json",
+            },
+        })
+            .then(res=>res.json())
+            .then(data=>{
+                if (data.length>0){
+                    setTotalReqs(data[0].total)
+                }
+            })
+        fetch(`http://localhost:8000/requests/?`+urlParams,{
+            method: 'GET',
+            headers: {
+                "Content-Type": "application/json",
+            },
+        })
+            .then(res=>res.json())
+            .then(data=>{
+                const requestsWithCorrectTime = data.map(e=>{
+                    return {...e,timestamp:new Date(e.timestamp)}
+                })
+                setRequests(requestsWithCorrectTime)
+                setSearchValues(['','','',''])
+                setDateFrom('')
+                setDateTo('')
+            })
+    }
 
     const filterRequests = ()=>{
-        let newRequests = [...currentRequests]
+        let urlParams = new URLSearchParams({})
         for (let i=0;i<3;i++){
             if (searchValues[i].length>0){
-                const searchValue = searchValues[i]
-                const currentFilter = filterParams[i]
-                 newRequests= newRequests.filter(e=>{
-                    return  _.get(e,`${currentFilter}`).toString().toLowerCase().includes(searchValue.toLowerCase())
-                })
+                urlParams.append(filterParams[i],searchValues[i])
             }
         }
-        if (dateTo.length>0 && dateFrom.length>0){
-            const from = new Date(dateFrom)
-            const to = new Date(dateTo)
-            if (to>=from){
-                newRequests = newRequests.filter(e=>{
-                    return (e.timestamp.getFullYear()>=from.getFullYear() && e.timestamp.getFullYear()<=to.getFullYear() &&
-                        e.timestamp.getMonth()>=from.getMonth() && e.timestamp.getMonth()<=to.getMonth() &&
-                        e.timestamp.getDate()>=from.getDate() && e.timestamp.getDate()<=to.getDate())
+        if (dateFrom.length>0 && dateTo.length>0){
+            let from = new Date(dateFrom)
+            urlParams.append('dateFrom',from.toISOString())
+            let to = new Date(dateTo)
+            urlParams.append('dateTo',to.toISOString())
+        }
+        urlParams.append('page',0)
+        fetch(`http://localhost:8000/requests/count/?`+urlParams,{
+            method: 'GET',
+            headers: {
+                "Content-Type": "application/json",
+            },
+        })
+            .then(res=>res.json())
+            .then(data=>{
+                if (data.length>0){
+                    setTotalReqs(data[0].total)
+                }
+            })
+        fetch(`http://localhost:8000/requests/?`+urlParams,{
+            method: 'GET',
+            headers: {
+                "Content-Type": "application/json",
+            },
+        })
+            .then(res=>res.json())
+            .then(data=>{
+                const requestsWithCorrectTime = data.map(e=>{
+                    return {...e,timestamp:new Date(e.timestamp)}
                 })
-            } else {
-                alert('Некорректный диапазон дат.')
+                setRequests(requestsWithCorrectTime)
+                setCurrentPage(0)
+            })
+    }
+
+    const updatePage = (delta)=>{
+        let urlParams = new URLSearchParams({})
+        for (let i=0;i<3;i++){
+            if (searchValues[i].length>0){
+                urlParams.append(filterParams[i],searchValues[i])
             }
         }
-        setCurrentRequests(newRequests)
+        if (dateFrom.length>0 && dateTo.length>0){
+            let from = new Date(dateFrom)
+            urlParams.append('dateFrom',from.toISOString())
+            let to = new Date(dateTo)
+            urlParams.append('dateTo',to.toISOString())
+        }
+        urlParams.append('page',currentPage+delta)
+        fetch(`http://localhost:8000/requests/?`+urlParams,{
+            method: 'GET',
+            headers: {
+                "Content-Type": "application/json",
+            },
+        })
+            .then(res=>res.json())
+            .then(data=>{
+                if (data.length>0){
+                    const requestsWithCorrectTime = data.map(e=>{
+                        return {...e,timestamp:new Date(e.timestamp)}
+                    })
+                    setCurrentPage(currentPage+delta)
+                    setRequests(requestsWithCorrectTime)
+                }
+            })
     }
-
-    const clearFilterValues = ()=>{
-        setCurrentRequests(requests)
-        setSearchValues(['','','',''])
-        setDateFrom('')
-        setDateTo('')
-    }
-
 
     return (
         <div >
             <PlotDialog
                 visible={isPlotVisible}
                 setVisible={setIsPlotVisible}
-                requests={currentRequests}
+                requests={requests}
             />
-            {/*<div style={{display:"flex",flexDirection:"row"}}>*/}
-            {/*    <div className="params">*/}
-            {/*        <span>Параметр:</span>*/}
-            {/*        <select id="select_stat" style={{marginLeft: 10, fontSize: 18}} value={currentFilter} onChange={(event)=>{*/}
-            {/*            setCurrentFilter(event.target.value)*/}
-            {/*            if (event.target.value===""){*/}
-            {/*                setCurrentRequests(requests)*/}
-            {/*            }*/}
-            {/*        }}>*/}
-            {/*            {filterParams.map(e=>*/}
-            {/*                <option key={e.value} value={e.value}>*/}
-            {/*                    {e.name}*/}
-            {/*                </option>*/}
-            {/*            )}*/}
-            {/*        </select>*/}
-            {/*    </div>*/}
-            {/*    {currentFilter === "" ?*/}
-            {/*        null :*/}
-            {/*        <div className="params" style={{marginLeft:0, padding: 0}}>*/}
-            {/*            <input className="myInput"*/}
-            {/*                   style={{width:200,fontSize:18,paddingTop:0}}*/}
-            {/*                   value={searchValue}*/}
-            {/*                   onChange={(e)=>{setSearchValue(e.target.value)}}/>*/}
-            {/*            <SearchIcon style={{verticalAlign:"middle", cursor:"pointer"}} onClick={filterRequests}/>*/}
-            {/*        </div>*/}
-            {/*    }*/}
-            {/*</div>*/}
-            <div style={{overflow: "auto",maxHeight:300}}>
-                {currentRequests.length>0 ? <table className="MyTable" style={{minWidth:700}}>
+            {requests.length===0 ? null :  <div style={{textAlign:'end',marginRight:20}}>
+                {currentPage>0 ? <KeyboardArrowLeftIcon
+                    style={{background: "#62A3E7",
+                        border: '2px solid rgba(40, 96, 173, 1)',
+                        borderRadius: 5,
+                        color: "white",
+                        verticalAlign:"middle",
+                        cursor:'pointer'}}
+                    onClick={()=>{updatePage(-1)}}
+                ></KeyboardArrowLeftIcon> : null}
+                <span style={{color: "#1A4297", fontSize: 20, paddingLeft: 5, paddingRight: 5, fontWeight:'bold'}}>{currentPage+1}</span>
+                {(currentPage+1)*pageSize >= totalReqs ? null :  <KeyboardArrowRightIcon
+                    style={{background: "#62A3E7",
+                        border: '2px solid rgba(40, 96, 173, 1)',
+                        borderRadius: 5,
+                        color: "white",
+                        verticalAlign:"middle", cursor:'pointer'}}
+                    onClick={()=>{updatePage(1)}}
+                >
+                </KeyboardArrowRightIcon>}
+            </div>}
+            <div style={{overflow: "auto",maxHeight:300,marginTop:10}}>
+                {requests.length>0 ? <table className="MyTable" style={{minWidth:700}}>
                     <thead>
                     <tr>
                         <th>
@@ -144,9 +216,6 @@ const Statistics = (props) => {
                                    Дата
                                 </span>
                                 <div style={{marginLeft: 10, padding: 0}}>
-                                {/*    onClick={()=>{
-                                        filterRequests(filterParams[0],searchValues[0])
-                                    }}*/}
                                     <span style={{fontSize:16,paddingTop:0, color: "#2860ad"}}>
                                         От:
                                     </span>
@@ -221,7 +290,7 @@ const Statistics = (props) => {
                     </thead>
                     <tbody>
 
-                    {currentRequests.map(request=>
+                    {requests.map(request=>
                         <tr key={request._id}>
                             <td>
                                 {`${(new Date(request.timestamp)).toLocaleDateString()} ${(new Date(request.timestamp)).toLocaleTimeString()}`}
@@ -247,7 +316,7 @@ const Statistics = (props) => {
                         style={{marginLeft: 60, fontSize: 15, marginTop: 25,
                             paddingLeft: 10, paddingRight: 10, background: "#62A3E7",
                             border: '2px solid rgba(40, 96, 173, 1)'}}
-                        onClick={()=>filterRequests()}
+                        onClick={()=>{filterRequests()}}
                     >
                         Применить фильтры
                     </button>

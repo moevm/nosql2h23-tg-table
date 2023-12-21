@@ -4,33 +4,22 @@ import CreateIcon from '@mui/icons-material/Create';
 import AddUserDialog from "./dialogs/add_user_dialog";
 import EditUserDialog from "./dialogs/edit_user_dialog";
 import SearchIcon from "@mui/icons-material/Search";
-import _ from "lodash";
+import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 
 const Users = (props) => {
+
+    const pageSize = 2
+
     useEffect(()=>{
         props.setTitle("Пользователи")
     })
-
-    useEffect(()=>{
-        fetch("http://localhost:8000/students/",{
-            method: 'GET',
-            headers: {
-                "Content-Type": "application/json",
-            },
-        })
-            .then(res=>res.json())
-            .then(data=>{
-                setUsers(data)
-                setCurrentUsers(data)
-            })
-    },[])
 
     const MenuPage = () => {
         window.location.href='/menu';
     }
 
     const [users,setUsers] = useState([])
-    const [currentUsers, setCurrentUsers] = useState([])
     const [isEditUserDialogVisible, setIsEditUserDialogVisible] = useState(false)
     const [currentEditUser, setCurrentEditUser] = useState({_id:"",name:"",telegramId:"",groupNumber:""})
     const [isAddUserDialogVisible,setIsAddUserDialogVisible] = useState(false)
@@ -48,20 +37,7 @@ const Users = (props) => {
         })
         setSearchValues(newSearchValues)
     }
-    //
-    // const resetFilter = ()=>{
-    //     const select = document.getElementById("select_user")
-    //     select.value = ""
-    // }
-    //
-    // const filterUsers = (param)=>{
-    //     if (param===""){
-    //         setCurrentUsers(users)
-    //     } else {
-    //         const newUsers = [...users].filter(e=>e.groupNumber===param)
-    //         setCurrentUsers(newUsers)
-    //     }
-    // }
+
     const addUser = (user)=>{
         const body = {
             groupNumber: user.groupNumber,
@@ -78,12 +54,21 @@ const Users = (props) => {
             .then(res=>res.json())
             .then(data=>{
                 if (data.status===201){
-                    user._id = data._id
-                    user.requestCount = 0
-                    const newUsers = [...users]
-                    newUsers.push(user)
-                    setCurrentUsers(newUsers)
-                    setUsers(newUsers)
+                    setUsers(data.students)
+                    fetch("http://localhost:8000/students/count/?",{
+                        method: 'GET',
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                    })
+                        .then(res=>res.json())
+                        .then(data=>{
+                            if (data.length>0) {
+                                setTotalUsers(data[0].total)
+                            }
+                        })
+                    setCurrentPage(0)
+                    setSearchValues(['','','',''])
                 } else {
                     alert("Произошла ошибка")
                 }
@@ -109,7 +94,6 @@ const Users = (props) => {
                 if (data.status===200){
                     let newUsers = [...users]
                     newUsers = newUsers.map(item=> item._id===oldUser._id ? updatedUser : item)
-                    setCurrentUsers(newUsers)
                     setUsers(newUsers)
                 } else {
                     alert("Не удалось отредактировать данные")
@@ -127,9 +111,21 @@ const Users = (props) => {
             .then(res=>res.json())
             .then((data)=>{
                 if (data.status===200){
-                    let newUsers = [...users].filter(e=>e._id!==user._id)
-                    setCurrentUsers(newUsers)
-                    setUsers(newUsers)
+                    setUsers(data.students)
+                    fetch("http://localhost:8000/students/count/?",{
+                        method: 'GET',
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                    })
+                        .then(res=>res.json())
+                        .then(data=>{
+                            if (data.length>0) {
+                                setTotalUsers(data[0].total)
+                            }
+                        })
+                    setCurrentPage(0)
+                    setSearchValues(['','','',''])
                 } else {
                     alert("Удаление не удалось")
                 }
@@ -149,24 +145,48 @@ const Users = (props) => {
                 urlParams.append(filterParams[i],searchValues[i])
             }
         }
-        console.log(searchValues)
-        console.log(urlParams)
-         fetch("http://localhost:8000/students/?" + urlParams,{
-                    method: 'GET',
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                })
-                    .then(res=>res.json())
-                    .then(data=>{
-                        console.log(data)
-                        setUsers(data)
-                        setCurrentUsers(data)
-                    })
+        setCurrentPage(0)
+        urlParams.append('page',0)
+        fetch("http://localhost:8000/students/count/?" + urlParams,{
+            method: 'GET',
+            headers: {
+                "Content-Type": "application/json",
+            },
+        })
+            .then(res=>res.json())
+            .then(data=>{
+                if (data.length>0) {
+                    setTotalUsers(data[0].total)
+                }
+            })
+        fetch("http://localhost:8000/students/?" + urlParams,{
+            method: 'GET',
+            headers: {
+                "Content-Type": "application/json",
+            },
+        })
+            .then(res=>res.json())
+            .then(data=>{
+                setUsers(data)
+            })
     }
 
     const clearFilterValues = ()=>{
-        fetch("http://localhost:8000/students/?",{
+        const urlParams = new URLSearchParams({})
+        urlParams.append('page',0)
+        fetch("http://localhost:8000/students/count/?" + urlParams,{
+            method: 'GET',
+            headers: {
+                "Content-Type": "application/json",
+            },
+        })
+            .then(res=>res.json())
+            .then(data=>{
+                if (data.length>0) {
+                    setTotalUsers(data[0].total)
+                }
+            })
+        fetch("http://localhost:8000/students/?"+urlParams,{
                             method: 'GET',
                             headers: {
                                 "Content-Type": "application/json",
@@ -176,9 +196,62 @@ const Users = (props) => {
                             .then(data=>{
                                 console.log(data)
                                 setUsers(data)
-                                setCurrentUsers(data)
                             })
         setSearchValues(['','','',''])
+    }
+
+    const [currentPage,setCurrentPage] = useState(0)
+    const [totalUsers,setTotalUsers] = useState(0)
+
+
+    useEffect(()=>{
+        const urlParams = new URLSearchParams({})
+        urlParams.append("page",currentPage)
+        fetch("http://localhost:8000/students/count/?" + urlParams,{
+            method: 'GET',
+            headers: {
+                "Content-Type": "application/json",
+            },
+        })
+            .then(res=>res.json())
+            .then(data=>{
+                if (data.length>0) {
+                    setTotalUsers(data[0].total)
+                }
+            })
+        fetch("http://localhost:8000/students/?" + urlParams,{
+            method: 'GET',
+            headers: {
+                "Content-Type": "application/json",
+            },
+        })
+            .then(res=>res.json())
+            .then(data=>{
+                setUsers(data)
+            })
+    },[])
+
+    const updatePage = (delta)=>{
+        const urlParams = new URLSearchParams({})
+        for (let i=0;i<4;i++){
+            if (searchValues[i].length>0){
+                urlParams.append(filterParams[i],searchValues[i])
+            }
+        }
+        urlParams.append("page",currentPage+delta)
+        fetch("http://localhost:8000/students/?" + urlParams,{
+            method: 'GET',
+            headers: {
+                "Content-Type": "application/json",
+            },
+        })
+            .then(res=>res.json())
+            .then(data=>{
+                if (data.length>0){
+                    setCurrentPage(currentPage+delta)
+                    setUsers(data)
+                }
+            })
     }
     return (
         <div >
@@ -189,21 +262,29 @@ const Users = (props) => {
                 deleteUserFun={deleteUser}
                 user={currentEditUser}
             />
-            {/*<div className="params">*/}
-            {/*    <span>Параметр:</span>*/}
-            {/*    <select id="select_user" style={{marginLeft: 10, fontSize: 18}} onChange={(event)=>{filterUsers(event.target.value)}}>*/}
-            {/*        <option value={""}>*/}
-            {/*            Все*/}
-            {/*        </option>*/}
-            {/*        {(Array.from(new Set(users.map(e=>e.groupNumber))).map(number=>*/}
-            {/*            <option key={number} value={number}>*/}
-            {/*                {number}*/}
-            {/*            </option>*/}
-            {/*        ))}*/}
-            {/*    </select>*/}
-            {/*</div>*/}
-            <div style={{overflow: "auto",maxHeight:300}}>
-                {currentUsers.length>0 ? <table className="MyTable" style={{minWidth:700}}>
+            {users.length===0 ? null : <div style={{textAlign:'end',marginRight:20}}>
+                {currentPage>0 ? <KeyboardArrowLeftIcon
+                    style={{background: "#62A3E7",
+                        border: '2px solid rgba(40, 96, 173, 1)',
+                        borderRadius: 5,
+                        color: "white",
+                        verticalAlign:"middle",
+                        cursor:'pointer'}}
+                    onClick={()=>{updatePage(-1)}}
+                ></KeyboardArrowLeftIcon> : null}
+                <span style={{color: "#1A4297", fontSize: 20, paddingLeft: 5, paddingRight: 5, fontWeight:'bold'}}>{currentPage+1}</span>
+                {(currentPage+1)*pageSize >= totalUsers ? null : <KeyboardArrowRightIcon
+                    style={{background: "#62A3E7",
+                        border: '2px solid rgba(40, 96, 173, 1)',
+                        borderRadius: 5,
+                        color: "white",
+                        verticalAlign:"middle", cursor:'pointer'}}
+                    onClick={()=>{updatePage(1)}}
+                >
+                </KeyboardArrowRightIcon>}
+            </div>}
+            <div style={{overflow: "auto",maxHeight:300, marginTop:10}}>
+                {users.length>0 ? <table className="MyTable" style={{minWidth:700}}>
                     <thead>
                     <tr>
                         <th>
@@ -268,7 +349,7 @@ const Users = (props) => {
                     </tr>
                     </thead>
                     <tbody>
-                    {currentUsers.map(user=>
+                    {users.map(user=>
                         <tr key={user._id}>
                             <td>
                                 {user.groupNumber}

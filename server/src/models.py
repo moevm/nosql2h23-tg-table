@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from datetime import datetime
 from typing import Annotated, Optional, List
 
@@ -27,6 +25,12 @@ class Student(MongoDbEntity):
 class StudentWithRequests(Student):
     requestCount: int = Field()
 
+
+class StatusAndListStudents(BaseModel):
+    students: List[StudentWithRequests] = Field()
+    status: int = Field()
+
+
 class Column(MongoDbEntity):
     name: str = Field()
     index: int = Field()
@@ -42,6 +46,10 @@ class Sheet(MongoDbEntity):
     endColumn: int = Field()
     columns: List[Column]
 
+class SheetStatus(BaseModel):
+    sheet: Sheet = Field()
+    status: int = Field()
+
 
 class SpreadsheetShort(MongoDbEntity):
     name: str = Field()
@@ -50,6 +58,10 @@ class SpreadsheetShort(MongoDbEntity):
 class Spreadsheet(SpreadsheetShort):
     sheets: List[Sheet]
     link: str = Field()
+
+class SpreadsheetStatus(BaseModel):
+    spreadsheet: Spreadsheet = Field()
+    status: int = Field()
 
 
 class RequestStudent(BaseModel):
@@ -76,5 +88,7 @@ class RequestItem(MongoDbEntity):
     student: RequestStudent = Field()
     spreadsheet: RequestSpreadsheet = Field()
     timestamp: datetime = Field()
-    groupNumber: str = Field()
 
+
+class RequestItemGroupNumber(RequestItem):
+    groupNumber: str = Field()
