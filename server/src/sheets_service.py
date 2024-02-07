@@ -1,6 +1,5 @@
 import os
 from typing import Any
-
 from bson import ObjectId
 from googleapiclient.discovery import build
 import httplib2
@@ -38,7 +37,6 @@ def create_service() -> Any:
     # url = os.environ['SHEETS_API_URL']
     key = "AIzaSyAXTuuKFdoc4cJ3K_ZMBeiS-XVEvAmf7AI"
     url = "https://sheets.googleapis.com/$discovery/rest?version=v4"
-
     return build(
         'sheets',
         'v4',

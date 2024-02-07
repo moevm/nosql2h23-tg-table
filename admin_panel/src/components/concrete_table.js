@@ -318,6 +318,7 @@ const ConcreteTable = (props) => {
                     </div>
                 </div>
             }
+            <iframe src={linkValue} width="500" height="600"></iframe>
         </div>
     );
 };
