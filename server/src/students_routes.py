@@ -3,7 +3,7 @@ from fastapi import APIRouter, Body, Request, Response, HTTPException, status
 from fastapi.encoders import jsonable_encoder
 from typing import List, Optional, Union
 
-from models import Student, StudentWithRequests, StatusAndListStudents
+from models import Student, StudentWithRequests, StatusAndListStudents, StudentAndStatus
 
 router = APIRouter()
 
@@ -234,3 +234,17 @@ def import_students(request: Request, students: List[Student]):
         return {"status": 200}
     else:
         return {"status": 400}
+
+@router.get(
+    "/bot/{telegram_id}",
+    response_model=StudentAndStatus
+)
+def get_student_by_telegram_id(telegram_id: str, request:Request):
+    student = request.app.database["Students"].find_one({
+        "telegramId": telegram_id
+    })
+    print(student)
+    if student is not None:
+        return {'status': 200, 'student': student}
+    else:
+        return {'status': 400, 'student': None}

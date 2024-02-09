@@ -4,5 +4,5 @@ EXPOSE 3000
 
 WORKDIR /app/admin_panel
 
-ENTRYPOINT ["./launch.sh"]
+ENTRYPOINT npm install && npm run start
 

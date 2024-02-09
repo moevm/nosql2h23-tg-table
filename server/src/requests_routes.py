@@ -2,10 +2,15 @@ from bson import ObjectId
 from fastapi import APIRouter, Request
 from fastapi.encoders import jsonable_encoder
 from typing import List, Union
+import datetime
+import pytz
 
-from models import RequestItemGroupNumber, RequestItem
+from models import RequestItemGroupNumber, RequestItem, StudentAndSpreadsheet
+from sheets_service2 import get_data_from_spreadsheet
 
 router = APIRouter()
+
+timetz = pytz.timezone('Europe/Moscow')
 
 pageSize = 2
 
@@ -166,4 +171,27 @@ async def import_requests(request: Request, requests: List[RequestItem]):
     else:
         return {"status": 400}
 
-
+@router.get(
+    "/bot/{userName}/{table}",
+)
+def get_data_from_table(request: Request, userName: str, table: str):
+    spreadsheet = request.app.database['Spreadsheets'].find_one(
+        {'name': table})
+    student = request.app.database['Students'].find_one(
+        {"telegramId": userName}
+    )
+    #print(spreadsheet,flush=True)
+    tables = get_data_from_spreadsheet(spreadsheet, userName)
+    request.app.database["Requests"].insert_one({
+        "_id": ObjectId(),
+        "student": {
+            "studentId": ObjectId(student['_id']),
+            "studentName": student['name']
+        },
+        "spreadsheet": {
+            "spreadsheetId": ObjectId(spreadsheet['_id']),
+            "spreadsheetName": spreadsheet['name']
+        },
+        "timestamp": datetime.datetime.now(timetz).isoformat()
+    })
+    return tables

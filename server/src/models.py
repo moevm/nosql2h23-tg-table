@@ -46,6 +46,7 @@ class Sheet(MongoDbEntity):
     endColumn: int = Field()
     columns: List[Column]
 
+
 class SheetStatus(BaseModel):
     sheet: Sheet = Field()
     status: int = Field()
@@ -59,13 +60,14 @@ class Spreadsheet(SpreadsheetShort):
     sheets: List[Sheet]
     link: str = Field()
 
+
 class SpreadsheetStatus(BaseModel):
     spreadsheet: Spreadsheet = Field()
     status: int = Field()
 
 
 class RequestStudent(BaseModel):
-    studentId: Optional[PyObjectId] = Field(efault=None)
+    studentId: Optional[PyObjectId] = Field(default=None)
     studentName: str = Field()
 
     class Config:
@@ -92,3 +94,13 @@ class RequestItem(MongoDbEntity):
 
 class RequestItemGroupNumber(RequestItem):
     groupNumber: str = Field()
+
+
+class StudentAndStatus(BaseModel):
+    student: Optional[Student] = Field(default=None)
+    status: int = Field()
+
+
+class StudentAndSpreadsheet(BaseModel):
+    userName: str = Field()
+    table: str = Field()
