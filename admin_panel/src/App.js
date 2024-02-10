@@ -11,6 +11,7 @@ import Tables from "./components/tables";
 import Statistics from "./components/statistics";
 import Users from "./components/users";
 import ConcreteTable from "./components/concrete_table";
+import {CircularProgress} from "@mui/joy";
 
 
 const App = () => {
@@ -20,11 +21,11 @@ const App = () => {
         setTitle(_title)
     }
 
-
+    const [isLoading,setIsLoading] = useState(false)
     const router = createBrowserRouter([
         {
             path: "/",
-            element: <Login setTitle={setTitleComponent}/>,
+            element: <Login setTitle={setTitleComponent} setLoading={setIsLoading}/>,
         },
         {
             path: 'menu',
@@ -32,7 +33,7 @@ const App = () => {
         },
         {
             path: 'tables',
-            element: <Tables setTitle={setTitleComponent}/>
+            element: <Tables setTitle={setTitleComponent} setLoading={setIsLoading}/>
         },
         {
             path: 'users',
@@ -44,15 +45,19 @@ const App = () => {
         },
         {
             path: 'table/:id',
-            element: <ConcreteTable setTitle={setTitleComponent}/>
+            element: <ConcreteTable setTitle={setTitleComponent} setLoading={setIsLoading}/>
         }
     ]);
     return (
         <div className='Root'>
+            <div style={{visibility: isLoading ? "visible" : "hidden", position:'absolute',top:"50%",left:"41%", zIndex:1000,textAlign:"center"}}>
+                <p>Идёт загрузка, пожалуйста, ожидайте!</p>
+                <CircularProgress></CircularProgress>
+            </div>
             <h1 className='TitleApp'> Панель администрирования telegram-bot</h1>
-            <div className='BaseComponent'>
+            <div style={{filter: isLoading ? "blur(25px)" : "", pointerEvents: isLoading ? "none" : "auto"}} className='BaseComponent'>
                 <h1 className='TitleComponent'>{title}</h1>
-                <RouterProvider router={router}/>
+                <RouterProvider  router={router}/>
                 <TelegramIcon sx={{ color: "#2860AD", fontSize: 95, marginLeft:"auto"}}/>
             </div>
         </div>

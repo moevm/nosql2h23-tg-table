@@ -273,15 +273,19 @@ const Users = (props) => {
                     onClick={()=>{updatePage(-1)}}
                 ></KeyboardArrowLeftIcon> : null}
                 <span style={{color: "#1A4297", fontSize: 20, paddingLeft: 5, paddingRight: 5, fontWeight:'bold'}}>{currentPage+1}</span>
-                {(currentPage+1)*pageSize >= totalUsers ? null : <KeyboardArrowRightIcon
+                <KeyboardArrowRightIcon
                     style={{background: "#62A3E7",
                         border: '2px solid rgba(40, 96, 173, 1)',
                         borderRadius: 5,
                         color: "white",
-                        verticalAlign:"middle", cursor:'pointer'}}
+                        verticalAlign:"middle",
+                        cursor:'pointer',
+                        filter: (currentPage+1)*pageSize >= totalUsers ? "blur(2px)" : "",
+                        pointerEvents: (currentPage+1)*pageSize >= totalUsers ? "none" : "auto"
+                    }}
                     onClick={()=>{updatePage(1)}}
                 >
-                </KeyboardArrowRightIcon>}
+                </KeyboardArrowRightIcon>
             </div>}
             <div style={{overflow: "auto",maxHeight:300, marginTop:10}}>
                 {users.length>0 ? <table className="MyTable" style={{minWidth:700}}>

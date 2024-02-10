@@ -47,6 +47,7 @@ const ConcreteTable = (props) => {
             if (linkValue!==spreadsheet.link){
                 setIsSettingsVisible(true)
             } else {
+                props.setLoading(true)
                 fetch(`http://localhost:8000/spreadsheets/${id}`,{
                     method: 'PUT',
                     headers: {
@@ -59,7 +60,9 @@ const ConcreteTable = (props) => {
                         if (data.status===200){
                             setSpreadSheet(data.spreadsheet)
                             setCurrentSheetId(0)
+                            props.setLoading(false)
                         } else {
+                            props.setLoading(false)
                             alert("Не удалось отредактировать данные")
                         }
                     })
@@ -125,6 +128,7 @@ const ConcreteTable = (props) => {
                 columns: []
             }
         })
+        props.setLoading(true)
         fetch(`http://localhost:8000/spreadsheets/${id}/add_sheet`,{
             method: 'PUT',
             headers: {
@@ -138,7 +142,9 @@ const ConcreteTable = (props) => {
                     const copy = JSON.parse(JSON.stringify(spreadsheet))
                     copy.sheets.push(data.sheet)
                     setSpreadSheet(copy)
+                    props.setLoading(false)
                 } else {
+                    props.setLoading(false)
                     alert("Не удалось отредактировать данные")
                 }
             })
@@ -161,6 +167,7 @@ const ConcreteTable = (props) => {
         const copy = JSON.parse(JSON.stringify(spreadsheet))
         copy.sheets = sheets
         copy.link = linkValue
+        props.setLoading(true)
         fetch(`http://localhost:8000/spreadsheets/${id}`,{
             method: 'PUT',
             headers: {
@@ -171,9 +178,11 @@ const ConcreteTable = (props) => {
             .then(res=>res.json())
             .then((data)=>{
                 if (data.status===200){
+                    props.setLoading(false)
                     setSpreadSheet(data.spreadsheet)
                     setCurrentSheetId(0)
                 } else {
+                    props.setLoading(false)
                     alert("Не удалось отредактировать данные")
                 }
             })

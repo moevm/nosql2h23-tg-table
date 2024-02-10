@@ -91,6 +91,7 @@ const Tables = (props) => {
             name: `[${subject}] ${groupList.map(e=>{return e.groupNumber}).join(", ")}`,
             sheets : sheets
         }
+        props.setLoading(true)
         fetch("http://localhost:8000/spreadsheets/",{
             method: 'POST',
             headers: {
@@ -114,6 +115,7 @@ const Tables = (props) => {
                     setAddTableSettings([])
                     setGroupsList([])
                     setIsAddDialogVisible(false)
+                    props.setLoading(false)
                 } else {
                     alert("Произошла ошибка")
                 }

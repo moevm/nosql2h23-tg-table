@@ -8,6 +8,7 @@ const Login = (props) => {
     const [isWrongLogin,setIsWrongLogin] = useState(false)
 
     const login = ()=>{
+        props.setLoading(true)
         setIsWrongLogin(false)
         fetch("http://localhost:8000/login/",{
             method: 'GET',
@@ -18,8 +19,10 @@ const Login = (props) => {
             .then(res=>res.json())
             .then(data=>{
                 if (data.status===200){
+                    props.setLoading(false)
                     window.location.href = "/menu"
                 } else {
+                    props.setLoading(false)
                     setIsWrongLogin(true)
                 }
             })
