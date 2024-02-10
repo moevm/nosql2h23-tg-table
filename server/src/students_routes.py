@@ -7,7 +7,7 @@ from models import Student, StudentWithRequests, StatusAndListStudents, StudentA
 
 router = APIRouter()
 
-pageSize = 2
+pageSize = 7
 
 @router.get('/count', response_description="List of all students")
 async def get_students_params_count(

@@ -48,7 +48,7 @@ class Sheet(MongoDbEntity):
 
 
 class SheetStatus(BaseModel):
-    sheet: Sheet = Field()
+    sheet: Optional[Sheet] = Field(default=None)
     status: int = Field()
 
 
@@ -62,7 +62,7 @@ class Spreadsheet(SpreadsheetShort):
 
 
 class SpreadsheetStatus(BaseModel):
-    spreadsheet: Spreadsheet = Field()
+    spreadsheet: Optional[Spreadsheet] = Field(default=None)
     status: int = Field()
 
 

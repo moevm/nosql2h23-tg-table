@@ -12,80 +12,17 @@ router = APIRouter()
 
 timetz = pytz.timezone('Europe/Moscow')
 
-pageSize = 2
-
-@router.get('/count', response_description="Count of all requests")
-def get_requests_count(
-        request: Request,
-        page: int,
-        dateFrom: Union[str,None] = None,
-        dateTo: Union[str, None] = None,
-        groupNumber: Union[str, None] = None,
-        name: Union[str, None] = None,
-        spreadsheet: Union[str,None] = None
-):
-    dateFrom = dateFrom if (dateFrom is not None) else '1970-2-2T00:00:00Z'
-    dateTo = dateTo if (dateTo is not None) else '2999-1-1T:00:00:00Z'
-    groupNumber = groupNumber if (groupNumber is not None) else ""
-    name = name if (name is not None) else ""
-    spreadsheet = spreadsheet if (spreadsheet is not None) else ""
-    query = {
-        "groupNumber": {
-            "$regex": "{groupNumber}".format(groupNumber=groupNumber),
-        },
-        "student.studentName": {
-            "$regex": "{name}".format(name=name),
-            '$options': 'i'
-        },
-        "spreadsheet.spreadsheetName": {
-            "$regex": "{spreadsheet}".format(spreadsheet=spreadsheet),
-            '$options': 'i'
-        },
-        "timestamp": {
-            "$gte": dateFrom,
-            "$lte": dateTo
-        }
-    }
-    count = list(request.app.database["Requests"].aggregate([
-        {
-            "$lookup": {
-                    "from": "Students",
-                "localField": "student.studentId",
-                "foreignField": "_id",
-                "as": "tmpField"
-            }
-        },
-        {
-            "$addFields": {
-                "groupNumber": "$tmpField.groupNumber"
-            }
-        },
-        {
-          "$unwind": "$groupNumber"
-        },
-        {
-            "$project": {
-                "tmpField": 0
-            }
-        },
-        {
-            "$match": query
-        },
-        {
-            "$count": "total"
-        },
-    ]))
-    return count
+pageSize = 7
 
 @router.get('/', response_description="List of all requests", response_model=List[RequestItemGroupNumber])
 def get_requests(
         request: Request,
         page: int,
-        dateFrom: Union[str,None] = None,
+        dateFrom: Union[str, None] = None,
         dateTo: Union[str, None] = None,
         groupNumber: Union[str, None] = None,
         name: Union[str, None] = None,
-        spreadsheet: Union[str,None] = None
+        spreadsheet: Union[str, None] = None
 ):
     dateFrom = dateFrom if (dateFrom is not None) else '1970-2-2T00:00:00Z'
     dateTo = dateTo if (dateTo is not None) else '2999-1-1T:00:00:00Z'
@@ -112,7 +49,7 @@ def get_requests(
     requests = list(request.app.database["Requests"].aggregate([
         {
             "$lookup": {
-                    "from": "Students",
+                "from": "Students",
                 "localField": "student.studentId",
                 "foreignField": "_id",
                 "as": "tmpField"
@@ -124,7 +61,7 @@ def get_requests(
             }
         },
         {
-          "$unwind": "$groupNumber"
+            "$unwind": "$groupNumber"
         },
         {
             "$project": {
@@ -143,12 +80,73 @@ def get_requests(
     ]))
     return requests
 
+
+@router.get('/all/chart', response_description="List of all requests", response_model=List[RequestItemGroupNumber])
+def get_all_requests_with_params(
+        request: Request,
+        dateFrom: Union[str, None] = None,
+        dateTo: Union[str, None] = None,
+        groupNumber: Union[str, None] = None,
+        name: Union[str, None] = None,
+        spreadsheet: Union[str, None] = None
+):
+    dateFrom = dateFrom if (dateFrom is not None) else '1970-2-2T00:00:00Z'
+    dateTo = dateTo if (dateTo is not None) else '2999-1-1T:00:00:00Z'
+    groupNumber = groupNumber if (groupNumber is not None) else ""
+    name = name if (name is not None) else ""
+    spreadsheet = spreadsheet if (spreadsheet is not None) else ""
+    query = {
+        "groupNumber": {
+            "$regex": "{groupNumber}".format(groupNumber=groupNumber),
+        },
+        "student.studentName": {
+            "$regex": "{name}".format(name=name),
+            '$options': 'i'
+        },
+        "spreadsheet.spreadsheetName": {
+            "$regex": "{spreadsheet}".format(spreadsheet=spreadsheet),
+            '$options': 'i'
+        },
+        "timestamp": {
+            "$gte": dateFrom,
+            "$lte": dateTo
+        }
+    }
+    requests = list(request.app.database["Requests"].aggregate([
+        {
+            "$lookup": {
+                "from": "Students",
+                "localField": "student.studentId",
+                "foreignField": "_id",
+                "as": "tmpField"
+            }
+        },
+        {
+            "$addFields": {
+                "groupNumber": "$tmpField.groupNumber"
+            }
+        },
+        {
+            "$unwind": "$groupNumber"
+        },
+        {
+            "$project": {
+                "tmpField": 0
+            }
+        },
+        {
+            "$match": query
+        }
+    ]))
+    return requests
+
+
 @router.get(
     "/all",
     response_description="List of all requests",
     response_model=List[RequestItem]
 )
-async def get_all_requests(request:Request):
+async def get_all_requests(request: Request):
     requests = list(request.app.database['Requests'].find())
     return requests
 
@@ -171,6 +169,7 @@ async def import_requests(request: Request, requests: List[RequestItem]):
     else:
         return {"status": 400}
 
+
 @router.get(
     "/bot/{userName}/{table}",
 )
@@ -180,7 +179,7 @@ def get_data_from_table(request: Request, userName: str, table: str):
     student = request.app.database['Students'].find_one(
         {"telegramId": userName}
     )
-    #print(spreadsheet,flush=True)
+    # print(spreadsheet,flush=True)
     tables = get_data_from_spreadsheet(spreadsheet, userName)
     request.app.database["Requests"].insert_one({
         "_id": ObjectId(),

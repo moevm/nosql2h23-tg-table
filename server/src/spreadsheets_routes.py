@@ -76,6 +76,7 @@ def get_spreadsheet(_id: str, request: Request):
     response_model=SpreadsheetStatus
 )
 def update_spreadsheet(request: Request, spreadsheet: Spreadsheet):
+    print(spreadsheet,flush=True)
     spreadsheet = jsonable_encoder(spreadsheet)
     spreadsheet["_id"] = ObjectId(spreadsheet["_id"])
     for sheet in spreadsheet["sheets"]:
@@ -95,7 +96,7 @@ def update_spreadsheet(request: Request, spreadsheet: Spreadsheet):
     if flag:
         result = fill_columns(spreadsheet)
         if not result:
-            return {"status": 400}
+            return {"status": 400, "spreadsheet": None}
     update_result = request.app.database["Spreadsheets"].update_one(
         {"_id": ObjectId(spreadsheet["_id"])}, {"$set": {
             "sheets": spreadsheet["sheets"],

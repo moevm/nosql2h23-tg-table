@@ -9,6 +9,7 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import TableSettingsDialog from "./dialogs/table_settings_dialog";
 import LinkChangeDialog from "./dialogs/link_change_dialog";
+import ViewTableDialog from "./dialogs/view_table_dialog";
 
 const ConcreteTable = (props) => {
     let {id} = useParams()
@@ -152,6 +153,7 @@ const ConcreteTable = (props) => {
 
     const [currentSheetId,setCurrentSheetId] = useState(0)
     const [isSettingsVisible, setIsSettingsVisible] = useState(false)
+    const [isTableVisible, setIsTableVisible] = useState(false)
 
     const addNewSheets = (settings)=>{
         const sheets = settings.map(e=>{
@@ -190,6 +192,11 @@ const ConcreteTable = (props) => {
     }
     return (
         <div>
+            <ViewTableDialog
+                visible={isTableVisible}
+                setVisible={setIsTableVisible}
+                link={linkValue}>
+            </ViewTableDialog>
             <LinkChangeDialog
                 visible={isSettingsVisible}
                 setVisible={setIsSettingsVisible}
@@ -209,9 +216,10 @@ const ConcreteTable = (props) => {
                         <tbody>
                         <tr>
                             <td>
-                                <div className="TableInfo" style={{display:'flex', flexDirection:'row',alignItems:'center'}}>
+                                <div className="TableInfo" style={{width:330,display:'flex', flexDirection:'row',alignItems:'center'}}>
                                     <input
                                         className='myInput'
+                                        style={{fontSize:18}}
                                         value={linkValue}
                                         onChange={(e)=>{
                                             setLinkValue(e.target.value)
@@ -224,8 +232,8 @@ const ConcreteTable = (props) => {
                                     </PublicIcon>
                                 </div>
                             </td>
-                            <td style={{display:'flex',flexDirection:'row', alignItems:'center', marginTop:5}}>
-                                <div className="TableInfo" style={{background: "#62A3E7", width: "fit-content", minWidth: 0,marginRight:0}}>
+                            <td style={{display:'flex',flexDirection:'row', alignItems:'center', marginTop:10}}>
+                                <div className="TableInfo" style={{fontSize:18,background: "#62A3E7", width: "fit-content", minWidth: 0,marginRight:0}}>
                                     <span>Лист:</span>
                                     <select style={{marginLeft: 12}} value={currentSheetId} onChange={(e)=>{onChangeItem(e.target.value)}}>
                                         {[ ...Array(spreadsheet.sheets.length).keys() ].map(i => <option key={i} value = {i}>{i+1}</option>)}
@@ -239,9 +247,22 @@ const ConcreteTable = (props) => {
                             </td>
                         </tr>
                         <tr>
+                            <td>
+                                <div className="TableInfo" style={{width: 330,display:'flex', flexDirection:'row',alignItems:'center'}}>
+                                    <span style={{marginLeft:42, fontSize:18}}>Просмотр таблицы: </span>
+                                    <img
+                                        style={{width:27, height:30, marginLeft:5,cursor:"pointer"}}
+                                        src="https://www.gstatic.com/images/branding/product/1x/sheets_2020q4_48dp.png"
+                                        onClick={()=>{
+                                            setIsTableVisible(true)}}
+                                    />
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
                             <td colSpan="2">
-                                <div className="TableInfo" style={{marginLeft: 80, width: "fit-content", minWidth: 0,display:'flex', flexDirection:'row',alignItems:'center'}}>
-                                    <span>Номер строки с заголовком: </span>
+                                <div className="TableInfo" style={{width: 330, minWidth: 0,display:'flex', flexDirection:'row',alignItems:'center'}}>
+                                    <span style={{fontSize:18, marginLeft:15}}>Строка с заголовком: </span>
                                     {/*<span style={{fontFamily: "Lobster Two",marginLeft:15, marginRight: 15}}>{spreadsheet.sheets[currentSheetId]["startRow"]-1}</span>*/}
                                     <input
                                         style={{fontFamily: "Lobster Two", fontSize: 18, marginLeft:15, marginRight: 5, maxWidth:40}}
@@ -253,6 +274,11 @@ const ConcreteTable = (props) => {
                                     <CheckCircleOutlineIcon style={{cursor:'pointer'}} onClick={()=>{saveHeaderRow()}}>
                                     </CheckCircleOutlineIcon>
                                 </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colSpan="2">
+                                <hr style={{background: "#153A8A", height: 1, border: 'none'}}/>
                             </td>
                         </tr>
                         <tr>
@@ -312,14 +338,14 @@ const ConcreteTable = (props) => {
                     <div style={{display:"flex",flexDirection:"row",marginLeft:40,marginTop: 60}}>
                         <button
                             className='defaultButton'
-                            style={{marginRight: 35, fontSize: 25}}
+                            style={{marginRight: 35, fontSize: 18}}
                             onClick={TablePage}
                         >
                             Назад
                         </button>
                         <button
                             className='defaultButton'
-                            style={{marginRight: 35, fontSize: 25, background: "#62A3E7"}}
+                            style={{marginRight: 35, fontSize: 18, background: "#62A3E7"}}
                             onClick={saveTable}
                         >
                             Применить
@@ -327,7 +353,6 @@ const ConcreteTable = (props) => {
                     </div>
                 </div>
             }
-            <iframe src={linkValue} width="500" height="600"></iframe>
         </div>
     );
 };

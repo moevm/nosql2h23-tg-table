@@ -50,8 +50,8 @@ const App = () => {
     ]);
     return (
         <div className='Root'>
-            <div style={{visibility: isLoading ? "visible" : "hidden", position:'absolute',top:"50%",left:"41%", zIndex:1000,textAlign:"center"}}>
-                <p>Идёт загрузка, пожалуйста, ожидайте!</p>
+            <div style={{visibility: isLoading ? "visible" : "hidden", position:'absolute',top:"45%",left:"36%", zIndex:1000,textAlign:"center"}}>
+                <p style={{color: "#2860AD", fontSize:26}}>Идёт загрузка, пожалуйста подождите...</p>
                 <CircularProgress></CircularProgress>
             </div>
             <h1 className='TitleApp'> Панель администрирования telegram-bot</h1>

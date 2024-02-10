@@ -38,5 +38,19 @@ services:
       - server
       - mongodb
 
+#  bot:
+#    build:
+#      context: ./bot
+#    container_name: 'telegramBot_bot'
+#    env_file:
+#      - .env
+#    volumes:
+#      - ./bot:/app/bot
+#    restart: always
+#    depends_on:
+#      - mongodb
+#      - server
+#      - admin_panel
+
 volumes:
   mongo_volume:

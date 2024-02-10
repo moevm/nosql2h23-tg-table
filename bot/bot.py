@@ -8,6 +8,7 @@ greet = 'Добро пожаловать в официального бота д
 auth = 'Вы успешно авторизировались.'
 not_auth = 'К сожалению Вас нет в списке пользователей. Если это ошибка, то напишите администратору.'
 selection = 'Вам доступны следующие таблицы'
+wait = 'Подождите..'
 if_auth = False
 
 
@@ -46,14 +47,22 @@ def selection_buttons(message):
 
 @bot.callback_query_handler(func=lambda callback: True)
 def get_info(callback):
+    bot.reply_to(callback.message, wait)
     result = requests.get(f'http://127.0.0.1:8000/requests/bot/{callback.from_user.username}/{callback.data}')
     body = json.loads(result.text)
     info(callback, body)
 
 def info(callback, body):
     sep = "\n"
-    sep2 = '-'*50
-    body = list(map(lambda x: f'{sep2}{sep}{list(x.keys())[0]}: {sep}{sep.join(x[list(x.keys())[0]])}', body))
-    bot.reply_to(callback.message, f'Результат:\n{sep.join(body,)}')
+    sep2 = '-'*39
+    body_true = []
+    for elem in body:
+        if len(list(elem.values())[0])!=0:
+            body_true.append(elem)
+    body_true = list(map(lambda x: f'{sep2}{sep}{list(x.keys())[0]}: {sep}{sep.join(x[list(x.keys())[0]])}', body_true))
+    if len(body_true) != 0:
+        bot.send_message(callback.message.chat.id, f'Результат:\n{sep.join(body_true,)}')
+    else:
+        bot.send_message(callback.message.chat.id, 'Нет записей в таблице.')
 
 bot.polling(none_stop=True)

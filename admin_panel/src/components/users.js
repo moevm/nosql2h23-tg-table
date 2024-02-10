@@ -9,7 +9,7 @@ import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 
 const Users = (props) => {
 
-    const pageSize = 2
+    const pageSize = 7
 
     useEffect(()=>{
         props.setTitle("Пользователи")
@@ -263,24 +263,26 @@ const Users = (props) => {
                 user={currentEditUser}
             />
             {users.length===0 ? null : <div style={{textAlign:'end',marginRight:20}}>
-                {currentPage>0 ? <KeyboardArrowLeftIcon
-                    style={{background: "#62A3E7",
-                        border: '2px solid rgba(40, 96, 173, 1)',
-                        borderRadius: 5,
-                        color: "white",
-                        verticalAlign:"middle",
-                        cursor:'pointer'}}
-                    onClick={()=>{updatePage(-1)}}
-                ></KeyboardArrowLeftIcon> : null}
-                <span style={{color: "#1A4297", fontSize: 20, paddingLeft: 5, paddingRight: 5, fontWeight:'bold'}}>{currentPage+1}</span>
-                <KeyboardArrowRightIcon
-                    style={{background: "#62A3E7",
+                <KeyboardArrowLeftIcon
+                    style={{
+                        background: currentPage>0 ? "#62A3E7" : "#b6c8db",
                         border: '2px solid rgba(40, 96, 173, 1)',
                         borderRadius: 5,
                         color: "white",
                         verticalAlign:"middle",
                         cursor:'pointer',
-                        filter: (currentPage+1)*pageSize >= totalUsers ? "blur(2px)" : "",
+                        pointerEvents: currentPage>0 ? "auto" : "none"
+                    }}
+                    onClick={()=>{updatePage(-1)}}
+                ></KeyboardArrowLeftIcon>
+                <span style={{color: "#1A4297", fontSize: 20, paddingLeft: 5, paddingRight: 5, fontWeight:'bold'}}>{currentPage+1}</span>
+                <KeyboardArrowRightIcon
+                    style={{background: (currentPage+1)*pageSize >= totalUsers ?  "#b6c8db" : "#62A3E7",
+                        border: '2px solid rgba(40, 96, 173, 1)',
+                        borderRadius: 5,
+                        color: "white",
+                        verticalAlign:"middle",
+                        cursor:'pointer',
                         pointerEvents: (currentPage+1)*pageSize >= totalUsers ? "none" : "auto"
                     }}
                     onClick={()=>{updatePage(1)}}

@@ -4,6 +4,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import BaseDialog from "./base_dialog";
 import GroupList from "./group_list/group_list";
 import TableSettingsDialog from "./dialogs/table_settings_dialog";
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 
 const Tables = (props) => {
 
@@ -257,6 +258,19 @@ const Tables = (props) => {
                 </div>
             </BaseDialog>
             <div>
+                <InfoOutlinedIcon onClick={()=>{alert("1. Система поддерживает таблицы только в формате \"Google Docs\";\n" +
+                    "2. Убедитесь, что в таблице присутствует колонка \"telegramId\";\n" +
+                    "3. Колонка \"telegramId\" содержит username'ы студентов в мессенджере Telegram;\n" +
+                    "4. Названия колонок должны находиться в одной строке;\n" +
+                    "5. При добавлении листов таблиц они отображаются в системе по порядку;\n" +
+                    "6. Для добавления таблицы требуется указать всю требуемую информацию обо всех листах, которые нужно добавить в систему;\n" +
+                    "7. Система поддерживает взаимодействие с приватными таблицами. Для этого необходимо в \"Настройках доступа\" таблицы добавить в группу \"Редакторы\" сервисный аккаунт \"email@gmail.com\"\n" +
+                    "8. При замене ссылки на странице текущей таблицы -- названия колонок обновятся в соответствии со структурой таблицы, на которую ведёт новая ссылка\n" +
+                    "9. При нажатии на символ \"планеты\" возле ссылки -- выполнится переход по соответствующей ссылке;\n" +
+                    "10. \"Просмотр таблицы\" позволит увидеть таблицу внутри системы;\n" +
+                    "11. Чтобы сохранить изменения, внесенный в настройки таблицы, нажмите кнопку \"Применить\";")}} style={{color:"#016EB2", cursor:"pointer"}}></InfoOutlinedIcon>
+            </div>
+            <div>
                 {tablesList.map(table =>
                     <div className='tablesListItem' key = {table._id} onClick={()=>
                         TablePage(table._id)}>
@@ -269,7 +283,7 @@ const Tables = (props) => {
                 )}
                 <button
                     className='defaultButton'
-                    style={{background: '#016EB2'}}
+                    style={{background: '#016EB2',fontSize:20}}
                     onClick={()=>{setIsAddDialogVisible(true)}}
                 >
                     Добавить таблицу
@@ -277,7 +291,7 @@ const Tables = (props) => {
             </div>
             <button
                 className='defaultButton'
-                style={{marginTop: 60, marginRight: 305, fontSize: 25}}
+                style={{marginTop: 60, marginRight: 305, fontSize: 18}}
                 onClick={MenuPage}
             >
                 Назад

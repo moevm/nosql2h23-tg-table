@@ -10,22 +10,24 @@ const Statistics = (props) => {
         props.setTitle("Статистика")
     })
 
-    const pageSize = 2
+    const pageSize = 7
 
     useEffect(()=>{
         let urlParams = new URLSearchParams({})
         urlParams.append('page',currentPage)
-        fetch(`http://localhost:8000/requests/count/?`+urlParams,{
+        fetch(`http://localhost:8000/requests/all/chart`,{
             method: 'GET',
             headers: {
                 "Content-Type": "application/json",
-            },
+            }
         })
             .then(res=>res.json())
             .then(data=>{
-                if (data.length>0){
-                    setTotalReqs(data[0].total)
-                }
+                const requestsWithCorrectTime = data.map(e=>{
+                    return {...e,timestamp:new Date(e.timestamp)}
+                })
+                setTotalReqs(data.length)
+                setChartRequests(requestsWithCorrectTime)
             })
         fetch(`http://localhost:8000/requests/?`+urlParams,{
             method: 'GET',
@@ -49,6 +51,7 @@ const Statistics = (props) => {
     const filterParams = ["groupNumber","name","spreadsheet"]
 
     const [requests,setRequests] = useState([])
+    const [chartRequests, setChartRequests] = useState([])
     const [isPlotVisible, setIsPlotVisible] = useState(false)
     const [searchValues,setSearchValues] = useState([
         '','',''
@@ -118,18 +121,6 @@ const Statistics = (props) => {
             urlParams.append('dateTo',to.toISOString())
         }
         urlParams.append('page',0)
-        fetch(`http://localhost:8000/requests/count/?`+urlParams,{
-            method: 'GET',
-            headers: {
-                "Content-Type": "application/json",
-            },
-        })
-            .then(res=>res.json())
-            .then(data=>{
-                if (data.length>0){
-                    setTotalReqs(data[0].total)
-                }
-            })
         fetch(`http://localhost:8000/requests/?`+urlParams,{
             method: 'GET',
             headers: {
@@ -143,6 +134,20 @@ const Statistics = (props) => {
                 })
                 setRequests(requestsWithCorrectTime)
                 setCurrentPage(0)
+            })
+        fetch(`http://localhost:8000/requests/all/chart?`+urlParams,{
+            method: 'GET',
+            headers: {
+                "Content-Type": "application/json",
+            }
+        })
+            .then(res=>res.json())
+            .then(data=>{
+                const requestsWithCorrectTime = data.map(e=>{
+                    return {...e,timestamp:new Date(e.timestamp)}
+                })
+                setTotalReqs(data.length)
+                setChartRequests(requestsWithCorrectTime)
             })
     }
 
@@ -183,28 +188,34 @@ const Statistics = (props) => {
             <PlotDialog
                 visible={isPlotVisible}
                 setVisible={setIsPlotVisible}
-                requests={requests}
+                requests={chartRequests}
             />
             {requests.length===0 ? null :  <div style={{textAlign:'end',marginRight:20}}>
-                {currentPage>0 ? <KeyboardArrowLeftIcon
-                    style={{background: "#62A3E7",
+                <KeyboardArrowLeftIcon
+                    style={{
+                        background: currentPage>0 ? "#62A3E7" : "#b6c8db",
                         border: '2px solid rgba(40, 96, 173, 1)',
                         borderRadius: 5,
                         color: "white",
                         verticalAlign:"middle",
-                        cursor:'pointer'}}
+                        cursor:'pointer',
+                        pointerEvents: currentPage>0 ? "auto" : "none"
+                    }}
                     onClick={()=>{updatePage(-1)}}
-                ></KeyboardArrowLeftIcon> : null}
+                ></KeyboardArrowLeftIcon>
                 <span style={{color: "#1A4297", fontSize: 20, paddingLeft: 5, paddingRight: 5, fontWeight:'bold'}}>{currentPage+1}</span>
-                {(currentPage+1)*pageSize >= totalReqs ? null :  <KeyboardArrowRightIcon
-                    style={{background: "#62A3E7",
+                <KeyboardArrowRightIcon
+                    style={{background: (currentPage+1)*pageSize >= totalReqs ?  "#b6c8db" : "#62A3E7",
                         border: '2px solid rgba(40, 96, 173, 1)',
                         borderRadius: 5,
                         color: "white",
-                        verticalAlign:"middle", cursor:'pointer'}}
+                        verticalAlign:"middle",
+                        cursor:'pointer',
+                        pointerEvents: (currentPage+1)*pageSize >= totalReqs ? "none" : "auto"
+                    }}
                     onClick={()=>{updatePage(1)}}
                 >
-                </KeyboardArrowRightIcon>}
+                </KeyboardArrowRightIcon>
             </div>}
             <div style={{overflow: "auto",maxHeight:300,marginTop:10}}>
                 {requests.length>0 ? <table className="MyTable" style={{minWidth:700}}>
