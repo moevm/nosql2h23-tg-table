@@ -1,9 +1,13 @@
+import os
+
 import telebot
 from telebot import types
 import requests
 import json
 
-bot = telebot.TeleBot('6780358276:AAFZ6bzvQ73DDowsJA455pfK223eq01fyTc')
+#os.environ["TELEGRAM_BOT_TOKEN"]
+
+bot = telebot.TeleBot("6780358276:AAFZ6bzvQ73DDowsJA455pfK223eq01fyTc")
 greet = 'Добро пожаловать в официального бота для курсов МОЭВМ!'
 auth = 'Вы успешно авторизировались.'
 not_auth = 'К сожалению Вас нет в списке пользователей. Если это ошибка, то напишите администратору.'

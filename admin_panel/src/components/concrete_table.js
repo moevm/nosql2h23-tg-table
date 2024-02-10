@@ -233,7 +233,7 @@ const ConcreteTable = (props) => {
                                 </div>
                             </td>
                             <td style={{display:'flex',flexDirection:'row', alignItems:'center', marginTop:10}}>
-                                <div className="TableInfo" style={{fontSize:18,background: "#62A3E7", width: "fit-content", minWidth: 0,marginRight:0}}>
+                                <div className="TableInfo" style={{fontSize:18,background: "#62A3E7", width: "fit-content", minWidth: 0,marginRight:0,marginTop:4}}>
                                     <span>Лист:</span>
                                     <select style={{marginLeft: 12}} value={currentSheetId} onChange={(e)=>{onChangeItem(e.target.value)}}>
                                         {[ ...Array(spreadsheet.sheets.length).keys() ].map(i => <option key={i} value = {i}>{i+1}</option>)}

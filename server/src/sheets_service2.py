@@ -1,13 +1,14 @@
+import os
+
 import googleapiclient.errors
 import pygsheets
 from bson import ObjectId
 
 from models import Spreadsheet, Sheet
 
-CREDS_FILE = '../creds.json'
 TELEGRAM_ID_COLUMN = "telegramId"
 
-googlesheet_client: pygsheets.client.Client = pygsheets.authorize(service_file=CREDS_FILE)
+googlesheet_client: pygsheets.client.Client = pygsheets.authorize(service_file=f"../{os.environ['CREDENTIALS']}")
 
 
 def fill_columns(spreadsheet: Spreadsheet):
