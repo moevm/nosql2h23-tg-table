@@ -30,27 +30,25 @@ services:
     container_name: 'telegramBot_frontend'
     ports:
       - "127.0.0.1:3000:3000"
-    volumes:
-      - ./admin_panel:/app/admin_panel
     stdin_open: true
     tty: true
     depends_on:
       - server
       - mongodb
 
-#  bot:
-#    build:
-#      context: ./bot
-#    container_name: 'telegramBot_bot'
-#    env_file:
-#      - .env
-#    volumes:
-#      - ./bot:/app/bot
-#    restart: always
-#    depends_on:
-#      - mongodb
-#      - server
-#      - admin_panel
+  bot:
+    build:
+      context: ./bot
+    container_name: 'telegramBot_bot'
+    env_file:
+      - .env
+    volumes:
+      - ./bot:/app/bot
+    restart: always
+    depends_on:
+      - mongodb
+      - server
+      - admin_panel
 
 volumes:
   mongo_volume:
