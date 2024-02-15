@@ -5,9 +5,7 @@ from telebot import types
 import requests
 import json
 
-#os.environ["TELEGRAM_BOT_TOKEN"]
-
-bot = telebot.TeleBot("6780358276:AAFZ6bzvQ73DDowsJA455pfK223eq01fyTc")
+bot = telebot.TeleBot(os.environ["TELEGRAM_BOT_TOKEN"])
 greet = 'Добро пожаловать в официального бота для курсов МОЭВМ!'
 auth = 'Вы успешно авторизировались.'
 not_auth = 'К сожалению Вас нет в списке пользователей. Если это ошибка, то напишите администратору.'
@@ -20,7 +18,7 @@ if_auth = False
 @bot.message_handler(commands=['start'])
 def start_f(message):
     student_username = message.from_user.username
-    result = requests.get(f'http://127.0.0.1:8000/students/bot/{student_username}')
+    result = requests.get(f'http://server:8000/students/bot/{student_username}')
     body = json.loads(result.text)
     if (body['status'] == 200):
         global if_auth
@@ -36,7 +34,7 @@ def start_f(message):
 @bot.message_handler(commands=['tables'])
 def selection_buttons(message):
     username = message.from_user.username
-    result = requests.get(f'http://127.0.0.1:8000/spreadsheets/bot/{username}')
+    result = requests.get(f'http://server:8000/spreadsheets/bot/{username}')
     body = json.loads(result.text)
     tables = list(map(lambda x: x['name'], body))
     if (if_auth and len(tables)!=0):
@@ -52,7 +50,7 @@ def selection_buttons(message):
 @bot.callback_query_handler(func=lambda callback: True)
 def get_info(callback):
     bot.reply_to(callback.message, wait)
-    result = requests.get(f'http://127.0.0.1:8000/requests/bot/{callback.from_user.username}/{callback.data}')
+    result = requests.get(f'http://server:8000/requests/bot/{callback.from_user.username}/{callback.data}')
     body = json.loads(result.text)
     info(callback, body)
 
