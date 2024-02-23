@@ -20,10 +20,8 @@
     margin-top: 35px;
     border: 10px solid rgba(170, 201, 254, 1);
     border-radius: 50px;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    text-align: center;display: flex;
+    flex-direction: column;align-items: center;
 }
 
 .TitleComponent{
